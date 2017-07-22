@@ -588,6 +588,11 @@
               <FileType>1</FileType>
               <FilePath>.\user\BLE.c</FilePath>
             </File>
+            <File>
+              <FileName>set.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\user\set.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

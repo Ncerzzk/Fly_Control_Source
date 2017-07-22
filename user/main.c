@@ -6,7 +6,7 @@
 #include "timer.h"
 #include "mpu9250.h"
 #include "lt8910.h"
-
+#include "set.h"
 #include "angle.h"
 #include "control.h"
 
@@ -15,12 +15,12 @@
 
 GPIO_InitTypeDef GPIO_InitStructure;
 
-u8 Debug=0;
+
 
 void main(){
 	
 	SystemInit();
-	Usart_Init(USART,9600);
+	Usart_Init(USART,115200);
 	
 	uprintf(USART,"Hello,world!\r\n");
 
@@ -47,8 +47,10 @@ void main(){
 		//uprintf(USART1,"%f\r\n",height);
 		//uprintf(USART,"%f\r\n",pitch);
 		if(Debug){
-			send_wave((int)pitch,(int)roll,0,0);
+			if(Send_Angle)
+				send_wave((int)pitch,(int)roll,(int)yaw,0);
 		}
+		
 	}
 }
 
@@ -91,7 +93,8 @@ void TIM6_IRQHandler(void){
 				//Get_Angle();
 				break;
 			case 3:
-				uprintf(USART,"test\r\n");
+				Fly_Control();
+				//uprintf(USART,"test\r\n");
 				break;
 			default:
 				break;
@@ -101,16 +104,25 @@ void TIM6_IRQHandler(void){
 		TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
 	}	
 }
-void USART1_IRQHandler(void){
+void UART4_IRQHandler(void){
 	char c;
-	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {  
-		USART_ClearITPendingBit(USART1,USART_IT_RXNE); 
-		c=USART_ReceiveData(USART1);
+	if(USART_GetITStatus(USART, USART_IT_RXNE) != RESET) {  
+		USART_ClearITPendingBit(USART,USART_IT_RXNE); 
+		c=USART_ReceiveData(USART);
 		switch(c){
 			case 'a':
 				break;
 			case 'd':
 				Debug=!Debug;
+				uprintf(USART,"Debug=  %d\r\n",Debug);
+				break;
+			case 'f':
+				Fly=1;
+				uprintf(USART,"start fly!\r\n");
+				break;
+			case 's':
+				Fly=0;
+				uprintf(USART,"stop fly!\r\n");
 				break;
 			default:
 				break;

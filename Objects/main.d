@@ -38,6 +38,7 @@
 .\objects\main.o: user\mpu9250.h
 .\objects\main.o: user\i2c.h
 .\objects\main.o: user\lt8910.h
+.\objects\main.o: user\set.h
 .\objects\main.o: user\angle.h
 .\objects\main.o: user\angle.h
 .\objects\main.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h

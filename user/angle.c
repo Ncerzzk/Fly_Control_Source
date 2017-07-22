@@ -4,6 +4,7 @@
 #define HALF_T 0.0025
 #define GRAVITY_CONSTANT 9.8			//重力加速度
 #define Semig 1e-6
+#define GY521 1
 
 s16 gyro_X,gyro_Y,gyro_Z;     //陀螺仪读出的16位有符号数
 s16 accel_X,accel_Y,accel_Z;  //加速度计读出的16位有符号数
@@ -235,7 +236,14 @@ void IMU_Update(float ax,float ay,float az,float wx,float wy,float wz){
 		pitch= asin(-2*q1*q3 + 2*q0*q2)* 57.3;
 		roll= atan2(2*q2*q3 + 2*q0*q1, -2*q1*q1 - 2*q2*q2+1)* 57.3; 
 		yaw=atan2(2*q1q2 + 2*q0q3, -2*q2q2 - 2*q3q3+1)* 57.3; 
-	
+		
+		if(GY521){
+			if(roll>0){
+				roll-=180;
+			}else{
+				roll+=180;
+			}
+		}
 }
 
 

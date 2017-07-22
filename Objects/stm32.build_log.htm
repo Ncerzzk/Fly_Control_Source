@@ -28,22 +28,46 @@ Project File Date:  07/21/2017
 *** Using Compiler 'V5.06 update 1 (build 61)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Target 1'
 compiling control.c...
-user\control.h(7): warning:  #1295-D: Deprecated declaration Brush_Init - give arg types
+user\control.h(11): warning:  #1295-D: Deprecated declaration Brush_Init - give arg types
   void Brush_Init();
-user\control.h(10): warning:  #1-D: last line of file ends without a newline
+user\control.h(12): warning:  #1295-D: Deprecated declaration Pitch_Control - give arg types
+  float Pitch_Control();
+user\control.h(13): warning:  #1295-D: Deprecated declaration Roll_Control - give arg types
+  float Roll_Control();
+user\control.h(14): warning:  #1295-D: Deprecated declaration Fly_Control - give arg types
+  void Fly_Control();
+user\control.h(26): warning:  #1-D: last line of file ends without a newline
   #endif
-user\control.c: 2 warnings, 0 errors
+user\set.h(6): warning:  #1-D: last line of file ends without a newline
+  #endif
+user\i2c.h(25): warning:  #1-D: last line of file ends without a newline
+  #endif
+user\mpu9250.h(123): warning:  #1295-D: Deprecated declaration MPU_init - give arg types
+  void MPU_init();
+user\angle.h(53): warning:  #1295-D: Deprecated declaration Get_Accel_Angle - give arg types
+  void Get_Accel_Angle();
+user\angle.h(54): warning:  #1295-D: Deprecated declaration Get_Angle_Speed - give arg types
+  void Get_Angle_Speed();
+user\angle.h(55): warning:  #1295-D: Deprecated declaration Write_Prams - give arg types
+  void Write_Prams();
+user\angle.h(56): warning:  #1295-D: Deprecated declaration Load_Prams - give arg types
+  void Load_Prams();
+user\angle.h(57): warning:  #1295-D: Deprecated declaration Get_Mag_Angle - give arg types
+  void Get_Mag_Angle();
+user\angle.h(59): warning:  #1295-D: Deprecated declaration Get_Angle - give arg types
+  void Get_Angle();
+user\control.c: 14 warnings, 0 errors
 linking...
-Program Size: Code=20096 RO-data=1096 RW-data=180 ZI-data=4212  
+Program Size: Code=21424 RO-data=1096 RW-data=268 ZI-data=4212  
 FromELF: creating hex file...
-".\Objects\stm32.axf" - 0 Error(s), 2 Warning(s).
+".\Objects\stm32.axf" - 0 Error(s), 14 Warning(s).
 
 <h2>Collection of Component include folders:</h2>
   C:\Users\ncer\Desktop\×ùÍ·¾¨³ÌÐò3\RTE
   D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>
