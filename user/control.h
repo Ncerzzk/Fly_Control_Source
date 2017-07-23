@@ -23,4 +23,21 @@ typedef struct{
 }PID_S;
 
 extern char Fly;
+extern PID_S Pitch_PID_Single;
+extern PID_S Roll_PID_Single;
+
+extern float Angle_Speed_X_Out;
+extern float Angle_Speed_Y_Out;
+
+
+extern PID_S Roll_PID;
+extern PID_S Pitch_PID;
+extern PID_S ANGLE_SPEED_X_PID;
+extern PID_S ANGLE_SPEED_Y_PID;
+extern PID_S ANGLE_SPEED_Z_PID;
+extern float base_duty;
+
+extern float pitch_target;   
+extern float roll_target;
+extern float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 #endif

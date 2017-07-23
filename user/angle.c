@@ -64,12 +64,12 @@ void Get_Accel_Angle(){
 	accel_Y=Get_Accel_Y();
 	accel_Z=Get_Accel_Z();
 
-	/*
-	if(accel_Z!=0){
-		roll_accel=atan2((float)accel_X,(float)accel_Z)*57.32;
+	
+	/*if(accel_Z!=0){
+		roll_accel=asin((float)accel_X*ACCEL_Range/32768.0/9.8)*57.32;
 		pitch_accel=atan2((float)accel_Y,(float)accel_Z)*57.32;
-	}
-	*/
+	}*/
+	
 	accel_speed_X=((float)accel_X)*ACCEL_Range/32768.0;
 	accel_speed_Y=((float)accel_Y)*ACCEL_Range/32768.0;
 	accel_speed_Z=((float)accel_Z)*ACCEL_Range/32768.0;

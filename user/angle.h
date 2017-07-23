@@ -61,6 +61,6 @@ void Get_Angle();
 extern float angle_speed_X,angle_speed_Y,angle_speed_Z;   //陀螺仪归一化后的角速度
 extern float accel_speed_X,accel_speed_Y,accel_speed_Z;   //加速度归一化后
 extern double pitch,roll,yaw;
-
+extern float roll_accel,pitch_accel;
 #endif
 

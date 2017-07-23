@@ -4,18 +4,32 @@
 
 //期望的俯仰、横滚、偏航角
 float pitch_target=5;   
-float roll_target=-1;
+float roll_target=15.5;  //-1
 float yaw_target=0;
-
+float Angle_Speed_X_Out=0;
+float Angle_Speed_Y_Out=0;
+float Angle_Speed_Z_Out=0;
 char Fly=0;
 
-PID_S Pitch_PID={2,0,0,0,0,1000};
-PID_S Roll_PID={-2,0,0,0,0,1000};
+float base_duty=50; //50
+float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 
+//PID 结构体参数
+//带Single是单级PID
+//不带Single是串级PID，内环为角速度环，外环为角度环
+PID_S Pitch_PID_Single={2,0,0,0,0,1000}; 
+PID_S Roll_PID_Single={-2,0,0,0,0,1000};
+
+
+PID_S Roll_PID={0.03,0,0,0,0,1000};
+PID_S Pitch_PID={-0.03,0,0,0,0,1000};
+PID_S ANGLE_SPEED_Y_PID={-3.5,-25,-0.017,0,0,1000};
+PID_S ANGLE_SPEED_X_PID={-3.5,-25,-0.017,0,0,1000};
+PID_S ANGLE_SPEED_Z_PID={15,0,0,0,0,1000};
 float Limit_Duty(float duty){
-	float max_duty=96;
+	float max_duty=100;
 	if(Debug){
-		max_duty=30;
+		max_duty=50;
 	}
 	if(duty>max_duty){
 		duty=max_duty;
@@ -96,18 +110,46 @@ void Brush_Init(){   //TIM2
 
 
 void Fly_Control(){
-	float Pitch_Out;
-	float Roll_Out;
-	float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
+	float Pitch_Out=0;
+	float Roll_Out=0;
+
+
 	//Pitch_Out=Pitch_Control();
 	//Pitch_Out=PID_Control(&Pitch_PID,pitch_target,pitch);
-	Pitch_Out=0;
-	Roll_Out=PID_Control(&Roll_PID,roll_target,roll);
 	
+	
+	Roll_Out=PID_Control(&Roll_PID,roll_target,roll);
+	if(Roll_Out>20){
+		Roll_Out=20;
+	}else if(Roll_Out<-20){
+		Roll_Out=-20;
+	}
+	
+	Angle_Speed_X_Out=PID_Control(&ANGLE_SPEED_X_PID,Roll_Out,angle_speed_X);
+	
+	
+	
+	Pitch_Out=PID_Control(&Pitch_PID,pitch_target,pitch);
+	if(Pitch_Out>20){
+		Pitch_Out=20;
+	}else if(Pitch_Out<-20){
+		Pitch_Out=-20;
+	}
+	Angle_Speed_Y_Out=PID_Control(&ANGLE_SPEED_Y_PID,Pitch_Out,angle_speed_Y);
+	//Angle_Speed_Z_Out=PID_Control(&ANGLE_SPEED_Z_PID,0,angle_speed_Z);
+	/*
+	//单级PID
 	CH1_Out=Pitch_Out-Roll_Out;  //以角度向前倾，向左倾为标准
 	CH2_Out=-Pitch_Out-Roll_Out;
 	CH3_Out=-Pitch_Out+Roll_Out;
 	CH4_Out=Pitch_Out+Roll_Out;
+	*/
+	
+	//串级PID
+	CH1_Out=-Angle_Speed_X_Out+Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty;  //以角度向前倾，向左倾为标准
+	CH2_Out=-Angle_Speed_X_Out-Angle_Speed_Y_Out-Angle_Speed_Z_Out+base_duty;
+	CH3_Out=Angle_Speed_X_Out-Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty;
+	CH4_Out=Angle_Speed_X_Out+Angle_Speed_Y_Out-Angle_Speed_Z_Out+base_duty;
 	
 	if(Fly){
 		Set_Brush_Speed(1,CH1_Out);
@@ -125,7 +167,7 @@ void Fly_Control(){
 
 
 
-
+/*
 
 #define SINGLE_PID 1    //单级PID
 float pitch_P=2;
@@ -155,3 +197,4 @@ float Roll_Control(){
 }
 
 
+*/

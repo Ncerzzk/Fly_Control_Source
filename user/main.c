@@ -46,11 +46,19 @@ void main(){
 		//send_wave((int)s_x,(int)s_y,(int)v_x,(int)yaw);
 		//uprintf(USART1,"%f\r\n",height);
 		//uprintf(USART,"%f\r\n",pitch);
-		if(Debug){
-			if(Send_Angle)
-				send_wave((int)pitch,(int)roll,(int)yaw,0);
-		}
 		
+		/*
+		1、标定角度正方向  pitch前倾为负   roll左倾为正
+		2、标定角速度正方向  X左倾为正   Y前倾为正 Z 顺时针为正
+		3、根据此正方向，修改PID中参数的符号
+		*/
+			if(Send_Angle){
+				//send_wave((int)pitch,(int)roll,(int)ANGLE_SPEED_Y_PID.i,(int)ANGLE_SPEED_X_PID.i);//标定角度正方向
+				//send_wave((int)angle_speed_X,(int)angle_speed_Y,(int)angle_speed_Z,0);//标定角速度正方向
+				
+				//send_wave((int)Angle_Speed_X_Out,(int)Angle_Speed_Y_Out,0,0);
+				send_wave((int)CH1_Out,(int)CH2_Out,(int)CH3_Out,(int)CH4_Out);
+			}
 	}
 }
 
@@ -110,7 +118,9 @@ void UART4_IRQHandler(void){
 		USART_ClearITPendingBit(USART,USART_IT_RXNE); 
 		c=USART_ReceiveData(USART);
 		switch(c){
-			case 'a':
+			case 't':
+				Send_Angle=!Send_Angle;
+				uprintf(USART,"SEND change!\r\n");
 				break;
 			case 'd':
 				Debug=!Debug;
@@ -124,6 +134,59 @@ void UART4_IRQHandler(void){
 				Fly=0;
 				uprintf(USART,"stop fly!\r\n");
 				break;
+			case 'p':
+				Roll_PID.KP+=0.01;
+				Pitch_PID.KP-=0.01;
+				uprintf(USART,"pitch_P=%f    roll_P=%f \r\n",Pitch_PID.KP,Roll_PID.KP);
+			
+				break;
+			case 'q':
+				Roll_PID.KP-=0.01;
+				Pitch_PID.KP+=0.01;
+				uprintf(USART,"pitch_P=%f    roll_P=%f \r\n",Pitch_PID.KP,Roll_PID.KP);
+				break;
+			case 'a':
+				base_duty+=1;
+				uprintf(USART,"base_duty=%f\r\n",base_duty);
+				break;
+			case 'b':
+				base_duty-=1;
+				uprintf(USART,"base_duty=%f\r\n",base_duty);
+				break;
+			case 'i':
+				pitch_target+=0.5;
+				uprintf(USART,"pitch_target=%f\r\n",pitch_target);
+				break;
+			case 'o':
+				pitch_target-=0.5;
+				uprintf(USART,"pitch_target=%f\r\n",pitch_target);
+				break;	
+			case 'e':
+				roll_target+=0.5;
+				uprintf(USART,"roll_target=%f\r\n",roll_target);
+				break;					
+			case 'r':
+				roll_target-=0.5;
+				uprintf(USART,"roll_target=%f\r\n",roll_target);
+				break;
+			case 'z':
+				ANGLE_SPEED_Y_PID.KI+=0.001;
+				ANGLE_SPEED_X_PID.KI+=0.001;
+				uprintf(USART,"angle_speed_ki=%f\r\n",ANGLE_SPEED_X_PID.KI);
+				break;
+			case 'x':
+				ANGLE_SPEED_Y_PID.KI-=0.001;
+				ANGLE_SPEED_X_PID.KI-=0.001;
+				uprintf(USART,"angle_speed_ki=%f\r\n",ANGLE_SPEED_X_PID.KI);
+				break;
+			case 'c':
+				ANGLE_SPEED_Z_PID.KP+=0.1;
+				uprintf(USART,"yaw_KP=%f\r\n",ANGLE_SPEED_Z_PID.KP);
+				break;
+			case 'v':
+				ANGLE_SPEED_Z_PID.KP+-0.1;
+				uprintf(USART,"yaw_KP=%f\r\n",ANGLE_SPEED_Z_PID.KP);
+				break;				
 			default:
 				break;
 		}
