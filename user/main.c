@@ -146,11 +146,11 @@ void UART4_IRQHandler(void){
 				uprintf(USART,"pitch_P=%f    roll_P=%f \r\n",Pitch_PID.KP,Roll_PID.KP);
 				break;
 			case 'a':
-				base_duty+=1;
+				base_duty+=0.3;
 				uprintf(USART,"base_duty=%f\r\n",base_duty);
 				break;
 			case 'b':
-				base_duty-=1;
+				base_duty-=0.3;
 				uprintf(USART,"base_duty=%f\r\n",base_duty);
 				break;
 			case 'i':

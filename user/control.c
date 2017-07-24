@@ -3,15 +3,15 @@
 #include "angle.h"
 
 //期望的俯仰、横滚、偏航角
-float pitch_target=5;   
-float roll_target=15.5;  //-1
+float pitch_target=11;   
+float roll_target=48.5;  //-1
 float yaw_target=0;
 float Angle_Speed_X_Out=0;
 float Angle_Speed_Y_Out=0;
 float Angle_Speed_Z_Out=0;
 char Fly=0;
 
-float base_duty=50; //50
+float base_duty=55; //50
 float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 
 //PID 结构体参数
@@ -23,8 +23,8 @@ PID_S Roll_PID_Single={-2,0,0,0,0,1000};
 
 PID_S Roll_PID={0.03,0,0,0,0,1000};
 PID_S Pitch_PID={-0.03,0,0,0,0,1000};
-PID_S ANGLE_SPEED_Y_PID={-3.5,-25,-0.017,0,0,1000};
-PID_S ANGLE_SPEED_X_PID={-3.5,-25,-0.017,0,0,1000};
+PID_S ANGLE_SPEED_Y_PID={-3.5,-25,0,0,0,1000};
+PID_S ANGLE_SPEED_X_PID={-3.5,-25,0,0,0,1000};
 PID_S ANGLE_SPEED_Z_PID={15,0,0,0,0,1000};
 float Limit_Duty(float duty){
 	float max_duty=100;
@@ -136,7 +136,7 @@ void Fly_Control(){
 		Pitch_Out=-20;
 	}
 	Angle_Speed_Y_Out=PID_Control(&ANGLE_SPEED_Y_PID,Pitch_Out,angle_speed_Y);
-	//Angle_Speed_Z_Out=PID_Control(&ANGLE_SPEED_Z_PID,0,angle_speed_Z);
+	Angle_Speed_Z_Out=PID_Control(&ANGLE_SPEED_Z_PID,0,angle_speed_Z);
 	/*
 	//单级PID
 	CH1_Out=Pitch_Out-Roll_Out;  //以角度向前倾，向左倾为标准

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\stm32.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\stm32.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Sun Jul 23 21:38:58 2017
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Mon Jul 24 10:34:19 2017
 <BR><P>
 <H3>Maximum Stack Usage =        320 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1031,7 +1031,7 @@ Global Symbols
 <P><STRONG><a name="[c]"></a>DebugMon_Handler</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f10x_it.o(i.DebugMon_Handler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f10x_hd.o(RESET)
 </UL>
-<P><STRONG><a name="[b6]"></a>Fly_Control</STRONG> (Thumb, 656 bytes, Stack size 32 bytes, control.o(i.Fly_Control))
+<P><STRONG><a name="[b6]"></a>Fly_Control</STRONG> (Thumb, 670 bytes, Stack size 32 bytes, control.o(i.Fly_Control))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = Fly_Control &rArr; PID_Control &rArr; __aeabi_fmul
 </UL>
 <BR>[Calls]<UL><LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
@@ -1469,13 +1469,11 @@ Global Symbols
 <LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Brush_Init
 </UL>
 
-<P><STRONG><a name="[43]"></a>UART4_IRQHandler</STRONG> (Thumb, 896 bytes, Stack size 32 bytes, main.o(i.UART4_IRQHandler))
+<P><STRONG><a name="[43]"></a>UART4_IRQHandler</STRONG> (Thumb, 926 bytes, Stack size 32 bytes, main.o(i.UART4_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 296 + Unknown Stack Size
 <LI>Call Chain = UART4_IRQHandler &rArr; uprintf &rArr; __c89vsnprintf &rArr; _printf_char_common &rArr; __printf
 </UL>
-<BR>[Calls]<UL><LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
-<LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fadd
-<LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
+<BR>[Calls]<UL><LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
 <LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dsub
 <LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 <LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2f
@@ -1898,7 +1896,6 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PID_Control
 <LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IMU_Update
 <LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Fly_Control
-<LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART4_IRQHandler
 </UL>
 
 <P><STRONG><a name="[122]"></a>_fadd</STRONG> (Thumb, 196 bytes, Stack size 16 bytes, faddsub_clz.o(x$fpl$fadd), UNUSED)
@@ -2015,7 +2012,6 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PID_Control
 <LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;IMU_Update
 <LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Fly_Control
-<LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART4_IRQHandler
 </UL>
 
 <P><STRONG><a name="[12c]"></a>_fsub</STRONG> (Thumb, 234 bytes, Stack size 16 bytes, faddsub_clz.o(x$fpl$fsub), UNUSED)
