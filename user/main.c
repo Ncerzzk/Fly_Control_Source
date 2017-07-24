@@ -11,8 +11,7 @@
 #include "control.h"
 
 #include "BLE.h"
-
-
+#include "SR04.h"
 GPIO_InitTypeDef GPIO_InitStructure;
 
 
@@ -28,6 +27,10 @@ void main(){
 	MPU_init();
 	//Tim2_Init();
 	TIMER_Init(TIM6);
+	if(CAP_TIM==TIM3){
+		TIM3_Cap_Init();
+	}
+	SR04_Init();
 	Brush_Init();
 	//Load_Prams();
 	uprintf(USART,"in  it ok!\r\n");
@@ -59,33 +62,50 @@ void main(){
 				//send_wave((int)Angle_Speed_X_Out,(int)Angle_Speed_Y_Out,0,0);
 				send_wave((int)CH1_Out,(int)CH2_Out,(int)CH3_Out,(int)CH4_Out);
 			}
+			//uprintf(USART,"Height:%f\r\n",height);
 	}
 }
 
+u8 overflow;//溢出计数
 
-/*
-void TIM2_IRQHandler(){
-	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){
-		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-		TIM_ITConfig(TIM2, TIM_IT_Update, DISABLE);   //关中断
-		switch(count){
-			case 1:
-				Get_Angle_Speed();
-				Get_Accel_Angle();
-				break;
-			case 2:
-				IMU_Update(accel_speed_X,accel_speed_Y,accel_speed_Z,angle_speed_X,angle_speed_Y,angle_speed_Z);
-				//Get_Angle();
-				break;
-			default:
-				break;
-		}
-		
-		count=(count+1)%5;
-		TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
-	}
-}
-*/
+typedef enum{
+	WAIT_RISING,
+	WAIT_FALLING
+}cap_state;
+
+cap_state state=WAIT_RISING;
+
+
+void TIM3_IRQHandler(void)  
+{   
+		if (TIM_GetITStatus(CAP_TIM, TIM_IT_Update) != RESET)  {         
+				++overflow;  
+		}  
+			
+		if (TIM_GetITStatus(CAP_TIM, TIM_IT_CC1) != RESET)//捕获事件  
+		{     
+			if(state == WAIT_RISING)      //初始状态,此时已经捕捉到了上升沿。             
+				{     
+						overflow = 0;  
+						TIM_SetCounter(CAP_TIM,0);  
+						state = WAIT_FALLING;    
+						TIM_OC1PolarityConfig(CAP_TIM,TIM_ICPolarity_Falling);     //设置为下降沿捕获  
+				}      
+				else if(state==WAIT_FALLING)// wait falling  
+				{  
+						cap_time = TIM_GetCapture1(CAP_TIM);  
+						cap_time+= overflow*2000;  
+							
+						overflow = 0;  
+						TIM_SetCounter(CAP_TIM,0);  
+						state = WAIT_RISING;  
+						TIM_OC1PolarityConfig(CAP_TIM,TIM_ICPolarity_Rising); //设置为上升沿捕获  
+							
+				}  
+		}                                                  
+   
+    TIM_ClearITPendingBit(CAP_TIM, TIM_IT_CC1|TIM_IT_Update); //清除中断  
+}  
 int count=0;
 void TIM6_IRQHandler(void){
 	if (TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET){
@@ -103,6 +123,9 @@ void TIM6_IRQHandler(void){
 			case 3:
 				Fly_Control();
 				//uprintf(USART,"test\r\n");
+				break;
+			case 4:
+				Get_Height();
 				break;
 			default:
 				break;
@@ -184,7 +207,7 @@ void UART4_IRQHandler(void){
 				uprintf(USART,"yaw_KP=%f\r\n",ANGLE_SPEED_Z_PID.KP);
 				break;
 			case 'v':
-				ANGLE_SPEED_Z_PID.KP+-0.1;
+				ANGLE_SPEED_Z_PID.KP-=0.1;
 				uprintf(USART,"yaw_KP=%f\r\n",ANGLE_SPEED_Z_PID.KP);
 				break;				
 			default:

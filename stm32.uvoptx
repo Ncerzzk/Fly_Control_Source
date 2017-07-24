@@ -172,7 +172,7 @@
           <Type>0</Type>
           <LineNumber>33</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134234278</Address>
+          <Address>134236994</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -182,22 +182,6 @@
           <Filename>C:\Users\ncer\Desktop\搴уご椴哥▼搴?\user\main.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\stm32\user/main.c\33</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>117</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134224352</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\ncer\Desktop\搴уご椴哥▼搴?\user\control.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\stm32\user/control.c\117</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -234,7 +218,12 @@
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>angle_speed_X</ItemText>
+          <ItemText>height</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>cap_time</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -792,8 +781,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\user\BLE.c</PathWithFileName>
-      <FilenameWithoutPath>BLE.c</FilenameWithoutPath>
+      <PathWithFileName>.\user\set.c</PathWithFileName>
+      <FilenameWithoutPath>set.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -804,8 +793,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\user\set.c</PathWithFileName>
-      <FilenameWithoutPath>set.c</FilenameWithoutPath>
+      <PathWithFileName>.\user\SR04.c</PathWithFileName>
+      <FilenameWithoutPath>SR04.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

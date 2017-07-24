@@ -1,17 +1,19 @@
 #include "control.h"
 #include "set.h"
 #include "angle.h"
+#include "SR04.h"
 
 //期望的俯仰、横滚、偏航角
 float pitch_target=11;   
 float roll_target=48.5;  //-1
 float yaw_target=0;
+float height_target=0;
 float Angle_Speed_X_Out=0;
 float Angle_Speed_Y_Out=0;
 float Angle_Speed_Z_Out=0;
 char Fly=0;
 
-float base_duty=55; //50
+float base_duty=0; //50
 float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 
 //PID 结构体参数
@@ -26,6 +28,8 @@ PID_S Pitch_PID={-0.03,0,0,0,0,1000};
 PID_S ANGLE_SPEED_Y_PID={-3.5,-25,0,0,0,1000};
 PID_S ANGLE_SPEED_X_PID={-3.5,-25,0,0,0,1000};
 PID_S ANGLE_SPEED_Z_PID={15,0,0,0,0,1000};
+PID_S Height_PID={15,0,0,0,0,1000};
+
 float Limit_Duty(float duty){
 	float max_duty=100;
 	if(Debug){
@@ -117,7 +121,7 @@ void Fly_Control(){
 	//Pitch_Out=Pitch_Control();
 	//Pitch_Out=PID_Control(&Pitch_PID,pitch_target,pitch);
 	
-	
+	base_duty=PID_Control(&Height_PID,height_target,height);
 	Roll_Out=PID_Control(&Roll_PID,roll_target,roll);
 	if(Roll_Out>20){
 		Roll_Out=20;

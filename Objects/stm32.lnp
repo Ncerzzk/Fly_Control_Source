@@ -38,8 +38,8 @@
 ".\objects\control.o"
 ".\objects\lt8910.o"
 ".\objects\hspi.o"
-".\objects\ble.o"
 ".\objects\set.o"
+".\objects\sr04.o"
 --strict --scatter ".\Objects\stm32.sct"
 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

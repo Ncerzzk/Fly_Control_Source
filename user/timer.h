@@ -4,4 +4,5 @@
 
 void Tim2_Init();
 void TIMER_Init(TIM_TypeDef *TIMER);
+void TIM3_Cap_Init();
 #endif

@@ -43,3 +43,12 @@ void send_wave(int data1,int data2,int data3,int data4){
 void send_wave_shaobo(float data1,float data2,float data3,float data4){
 	;
 }
+
+float avarge(int *data,int count){
+	int i=0;
+	int sum=0;
+	for(;i<count;++i){
+		sum+=data[i];
+	}
+	return (float)sum/(float)count;
+}

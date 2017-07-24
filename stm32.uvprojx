@@ -584,14 +584,14 @@
               <FilePath>.\user\Hspi.c</FilePath>
             </File>
             <File>
-              <FileName>BLE.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\user\BLE.c</FilePath>
-            </File>
-            <File>
               <FileName>set.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\user\set.c</FilePath>
+            </File>
+            <File>
+              <FileName>SR04.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\user\SR04.c</FilePath>
             </File>
           </Files>
         </Group>

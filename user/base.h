@@ -6,4 +6,5 @@
 
 void delay_init(int SYSCLK);
 void delay_us(long nus);
+float avarge(int *data,int count);
 #endif
