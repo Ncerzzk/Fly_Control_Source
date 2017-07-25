@@ -29,3 +29,5 @@
 .\objects\sr04.o: .\Lib\inc\stm32f10x_usart.h
 .\objects\sr04.o: .\Lib\inc\stm32f10x_wwdg.h
 .\objects\sr04.o: .\Lib\inc\misc.h
+.\objects\sr04.o: user\base.h
+.\objects\sr04.o: user\outputdata.h

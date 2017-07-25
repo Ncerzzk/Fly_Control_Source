@@ -4,16 +4,18 @@
 #include "SR04.h"
 
 //期望的俯仰、横滚、偏航角
-float pitch_target=11;   
-float roll_target=48.5;  //-1
+float pitch_target=3.25;     //22 
+float roll_target=0;  //48.5
 float yaw_target=0;
-float height_target=0;
+float height_target=80;   //单位cm
 float Angle_Speed_X_Out=0;
 float Angle_Speed_Y_Out=0;
 float Angle_Speed_Z_Out=0;
+float Height_Out=0;
+#define Height_Out_Max 50
 char Fly=0;
 
-float base_duty=0; //50
+float base_duty=30; //50
 float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 
 //PID 结构体参数
@@ -23,12 +25,12 @@ PID_S Pitch_PID_Single={2,0,0,0,0,1000};
 PID_S Roll_PID_Single={-2,0,0,0,0,1000};
 
 
-PID_S Roll_PID={0.03,0,0,0,0,1000};
-PID_S Pitch_PID={-0.03,0,0,0,0,1000};
+PID_S Roll_PID={0.03,0,0.0033,0,0,1000};
+PID_S Pitch_PID={-0.03,0,-0.0033,0,0,1000};
 PID_S ANGLE_SPEED_Y_PID={-3.5,-25,0,0,0,1000};
 PID_S ANGLE_SPEED_X_PID={-3.5,-25,0,0,0,1000};
 PID_S ANGLE_SPEED_Z_PID={15,0,0,0,0,1000};
-PID_S Height_PID={15,0,0,0,0,1000};
+PID_S Height_PID={0.3,0,0.0002,0,0,30000};
 
 float Limit_Duty(float duty){
 	float max_duty=100;
@@ -116,12 +118,22 @@ void Brush_Init(){   //TIM2
 void Fly_Control(){
 	float Pitch_Out=0;
 	float Roll_Out=0;
-
-
-	//Pitch_Out=Pitch_Control();
-	//Pitch_Out=PID_Control(&Pitch_PID,pitch_target,pitch);
 	
-	base_duty=PID_Control(&Height_PID,height_target,height);
+	
+	if(!Fly){
+		Set_Brush_Speed(1,0);
+		Set_Brush_Speed(2,0);
+		Set_Brush_Speed(3,0);
+		Set_Brush_Speed(4,0);		
+		return ;
+	}
+	
+	Height_Out=PID_Control(&Height_PID,height_target,height);	
+	if(Height_Out>Height_Out_Max){
+		Height_Out=Height_Out_Max;
+	}else if(Height_Out<-Height_Out_Max){
+		Height_Out=-Height_Out_Max;
+	}
 	Roll_Out=PID_Control(&Roll_PID,roll_target,roll);
 	if(Roll_Out>20){
 		Roll_Out=20;
@@ -141,6 +153,8 @@ void Fly_Control(){
 	}
 	Angle_Speed_Y_Out=PID_Control(&ANGLE_SPEED_Y_PID,Pitch_Out,angle_speed_Y);
 	Angle_Speed_Z_Out=PID_Control(&ANGLE_SPEED_Z_PID,0,angle_speed_Z);
+	
+	
 	/*
 	//单级PID
 	CH1_Out=Pitch_Out-Roll_Out;  //以角度向前倾，向左倾为标准
@@ -150,11 +164,17 @@ void Fly_Control(){
 	*/
 	
 	//串级PID
-	CH1_Out=-Angle_Speed_X_Out+Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty;  //以角度向前倾，向左倾为标准
-	CH2_Out=-Angle_Speed_X_Out-Angle_Speed_Y_Out-Angle_Speed_Z_Out+base_duty;
-	CH3_Out=Angle_Speed_X_Out-Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty;
-	CH4_Out=Angle_Speed_X_Out+Angle_Speed_Y_Out-Angle_Speed_Z_Out+base_duty;
+	CH1_Out=-Angle_Speed_X_Out+Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty+7+Height_Out;  //以角度向前倾，向左倾为标准
+	CH2_Out=-Angle_Speed_X_Out-Angle_Speed_Y_Out-Angle_Speed_Z_Out+base_duty+Height_Out;
+	CH3_Out=Angle_Speed_X_Out-Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty+Height_Out;
+	CH4_Out=Angle_Speed_X_Out+Angle_Speed_Y_Out-Angle_Speed_Z_Out+base_duty+Height_Out;
 	
+	Set_Brush_Speed(1,CH1_Out);
+	Set_Brush_Speed(2,CH2_Out);
+	Set_Brush_Speed(3,CH3_Out);
+	Set_Brush_Speed(4,CH4_Out);
+}
+	/*
 	if(Fly){
 		Set_Brush_Speed(1,CH1_Out);
 		Set_Brush_Speed(2,CH2_Out);
@@ -164,8 +184,8 @@ void Fly_Control(){
 		Set_Brush_Speed(1,0);
 		Set_Brush_Speed(2,0);
 		Set_Brush_Speed(3,0);
-		Set_Brush_Speed(4,0);
-	}
+		  Set_Brush_Speed(4,0);
+	}*
 	
 }
 

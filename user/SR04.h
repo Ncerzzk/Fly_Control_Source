@@ -5,4 +5,8 @@ extern float height;
 void Get_Height();
 extern int cap_time;
 void SR04_Init();
+#define CAP_BUFFER_SIZE 10
+extern int cap_time_data[CAP_BUFFER_SIZE];
+extern int cap_count;
+extern int cap_time;
 #endif

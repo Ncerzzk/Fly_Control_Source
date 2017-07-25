@@ -35,10 +35,12 @@ extern PID_S Pitch_PID;
 extern PID_S ANGLE_SPEED_X_PID;
 extern PID_S ANGLE_SPEED_Y_PID;
 extern PID_S ANGLE_SPEED_Z_PID;
+extern PID_S Height_PID;
 extern float base_duty;
 
 extern float pitch_target;   
 extern float roll_target;
 extern float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
+extern float Height_Out;
 
 #endif

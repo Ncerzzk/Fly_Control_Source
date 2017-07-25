@@ -49,6 +49,7 @@ void main(){
 		//send_wave((int)s_x,(int)s_y,(int)v_x,(int)yaw);
 		//uprintf(USART1,"%f\r\n",height);
 		//uprintf(USART,"%f\r\n",pitch);
+		//uprintf(USART,"%f\r\n",height);
 		
 		/*
 		1、标定角度正方向  pitch前倾为负   roll左倾为正
@@ -56,11 +57,11 @@ void main(){
 		3、根据此正方向，修改PID中参数的符号
 		*/
 			if(Send_Angle){
-				//send_wave((int)pitch,(int)roll,(int)ANGLE_SPEED_Y_PID.i,(int)ANGLE_SPEED_X_PID.i);//标定角度正方向
+				send_wave((int)pitch,(int)roll,(int)height,(int)Height_PID.i);//标定角度正方向
 				//send_wave((int)angle_speed_X,(int)angle_speed_Y,(int)angle_speed_Z,0);//标定角速度正方向
 				
 				//send_wave((int)Angle_Speed_X_Out,(int)Angle_Speed_Y_Out,0,0);
-				send_wave((int)CH1_Out,(int)CH2_Out,(int)CH3_Out,(int)CH4_Out);
+				//send_wave((int)CH1_Out,(int)CH2_Out,(int)CH3_Out,(int)CH4_Out);
 			}
 			//uprintf(USART,"Height:%f\r\n",height);
 	}
@@ -95,7 +96,14 @@ void TIM3_IRQHandler(void)
 				{  
 						cap_time = TIM_GetCapture1(CAP_TIM);  
 						cap_time+= overflow*2000;  
-							
+						
+					/*
+						if(cap_count<CAP_BUFFER_SIZE){
+							cap_time_data[cap_count]=cap_time;
+							cap_count++;
+						}
+					*/
+					
 						overflow = 0;  
 						TIM_SetCounter(CAP_TIM,0);  
 						state = WAIT_RISING;  
@@ -125,7 +133,11 @@ void TIM6_IRQHandler(void){
 				//uprintf(USART,"test\r\n");
 				break;
 			case 4:
+				SR04_Trig();
+				//if(cap_count>=CAP_BUFFER_SIZE){
 				Get_Height();
+					//cap_count=0;
+				//}
 				break;
 			default:
 				break;
@@ -193,14 +205,14 @@ void UART4_IRQHandler(void){
 				uprintf(USART,"roll_target=%f\r\n",roll_target);
 				break;
 			case 'z':
-				ANGLE_SPEED_Y_PID.KI+=0.001;
-				ANGLE_SPEED_X_PID.KI+=0.001;
-				uprintf(USART,"angle_speed_ki=%f\r\n",ANGLE_SPEED_X_PID.KI);
+				Roll_PID.KI+=0.0001;
+				Pitch_PID.KI-=0.0001;
+				uprintf(USART,"angle_speed_ki=%f\r\n",Roll_PID.KI);
 				break;
 			case 'x':
-				ANGLE_SPEED_Y_PID.KI-=0.001;
-				ANGLE_SPEED_X_PID.KI-=0.001;
-				uprintf(USART,"angle_speed_ki=%f\r\n",ANGLE_SPEED_X_PID.KI);
+				Roll_PID.KI-=0.0001;
+				Pitch_PID.KI+=0.0001;
+				uprintf(USART,"angle_speed_ki=%f\r\n",Roll_PID.KI);
 				break;
 			case 'c':
 				ANGLE_SPEED_Z_PID.KP+=0.1;
@@ -209,6 +221,22 @@ void UART4_IRQHandler(void){
 			case 'v':
 				ANGLE_SPEED_Z_PID.KP-=0.1;
 				uprintf(USART,"yaw_KP=%f\r\n",ANGLE_SPEED_Z_PID.KP);
+				break;				
+			case 'n':
+				Height_PID.KI+=0.001;
+				uprintf(USART,"height_KI=%f\r\n",Height_PID.KI);
+				break;
+			case 'm':
+				Height_PID.KI-=0.001;
+				uprintf(USART,"height_KI=%f\r\n",Height_PID.KI);
+				break;
+			case 'k':
+				Height_PID.KP+=0.1;
+				uprintf(USART,"Height_PID.KP=%f\r\n",Height_PID.KP);
+				break;
+			case 'l':
+				Height_PID.KP-=0.1;
+				uprintf(USART,"Height_PID.KP=%f\r\n",Height_PID.KP);
 				break;				
 			default:
 				break;

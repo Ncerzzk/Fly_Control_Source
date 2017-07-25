@@ -1,9 +1,12 @@
 #include "SR04.h"
+#include "base.h"
 
 float height;
-#define CAP_BUFFER_SIZE 10
+
+Kal_Struct kal_height={1,0,0.01,37.1160,0,1};
+
 int cap_time;
-int cap_time_data[10];
+int cap_time_data[CAP_BUFFER_SIZE];
 int cap_count;
 void SR04_Init(){
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -29,6 +32,11 @@ void SR04_Trig(){
 
 
 void Get_Height(){
-	height=cap_time*0.5*34000/1000000/2;   //单位为cm;
-	SR04_Trig();
+	//height=avarge(cap_time_data,CAP_BUFFER_SIZE)*0.5*34000/1000000/2;   //单位为cm;
+	float temp;
+	temp=cap_time*0.5*34000/1000000/2; 
+	if(temp<300){
+		height=temp;
+	}
+	height=KalMan(&kal_height,height);
 }
