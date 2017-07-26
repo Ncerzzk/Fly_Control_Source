@@ -13,6 +13,10 @@ float Pitch_Control();
 float Roll_Control();
 void Fly_Control();
 
+
+#define Height_Out_Max 50
+#define Limit(value,max)    if(value>max)value=max;else if(value<-max)value=-max
+
 typedef struct{
 	float KP;
 	float KD;
@@ -20,7 +24,10 @@ typedef struct{
 	float i;
 	float last_err;
 	float i_max;
+	float i_time;
 }PID_S;
+
+void clear_i(PID_S * temp);
 
 extern char Fly;
 extern PID_S Pitch_PID_Single;
@@ -42,5 +49,7 @@ extern float pitch_target;
 extern float roll_target;
 extern float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 extern float Height_Out;
-
+extern float Pitch_Out;
+extern float Roll_Out;
+#define clear_i(a) a.i=0
 #endif

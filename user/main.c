@@ -57,11 +57,13 @@ void main(){
 		3、根据此正方向，修改PID中参数的符号
 		*/
 			if(Send_Angle){
-				send_wave((int)pitch,(int)roll,(int)height,(int)Height_PID.i);//标定角度正方向
+				//send_wave((int)pitch,(int)Height_PID.i,(int)height,(int)Height_Out);//标定角度正方向
 				//send_wave((int)angle_speed_X,(int)angle_speed_Y,(int)angle_speed_Z,0);//标定角速度正方向
 				
 				//send_wave((int)Angle_Speed_X_Out,(int)Angle_Speed_Y_Out,0,0);
+				//send_wave((int)CH1_Out,(int)Pitch_Out,(int)Roll_PID.i,(int)Pitch_PID.i);
 				//send_wave((int)CH1_Out,(int)CH2_Out,(int)CH3_Out,(int)CH4_Out);
+				send_wave((int)Pitch_Out,(int)Roll_Out,(int)Angle_Speed_X_Out,(int)Angle_Speed_Y_Out);
 			}
 			//uprintf(USART,"Height:%f\r\n",height);
 	}
@@ -155,6 +157,7 @@ void UART4_IRQHandler(void){
 		switch(c){
 			case 't':
 				Send_Angle=!Send_Angle;
+				Height_PID.i=0;
 				uprintf(USART,"SEND change!\r\n");
 				break;
 			case 'd':
@@ -205,14 +208,18 @@ void UART4_IRQHandler(void){
 				uprintf(USART,"roll_target=%f\r\n",roll_target);
 				break;
 			case 'z':
-				Roll_PID.KI+=0.0001;
-				Pitch_PID.KI-=0.0001;
-				uprintf(USART,"angle_speed_ki=%f\r\n",Roll_PID.KI);
+				ANGLE_SPEED_X_PID.KI-=0.001;
+				ANGLE_SPEED_Y_PID.KI-=0.001;
+				clear_i(ANGLE_SPEED_X_PID);
+				clear_i(ANGLE_SPEED_Y_PID);
+				uprintf(USART,"angle_speed_ki=%f\r\n",ANGLE_SPEED_X_PID.KI);
 				break;
 			case 'x':
-				Roll_PID.KI-=0.0001;
-				Pitch_PID.KI+=0.0001;
-				uprintf(USART,"angle_speed_ki=%f\r\n",Roll_PID.KI);
+				ANGLE_SPEED_X_PID.KI+=0.001;
+				ANGLE_SPEED_Y_PID.KI+=0.001;
+				clear_i(ANGLE_SPEED_X_PID);
+				clear_i(ANGLE_SPEED_Y_PID);
+				uprintf(USART,"angle_speed_ki=%f\r\n",ANGLE_SPEED_X_PID.KI);
 				break;
 			case 'c':
 				ANGLE_SPEED_Z_PID.KP+=0.1;
@@ -224,11 +231,13 @@ void UART4_IRQHandler(void){
 				break;				
 			case 'n':
 				Height_PID.KI+=0.001;
-				uprintf(USART,"height_KI=%f\r\n",Height_PID.KI);
+				Height_PID.i_max=Height_Out_Max/Height_PID.KI;
+				uprintf(USART,"height_KI=%f     Height_PID.i_max=%f\r\n",Height_PID.KI,Height_PID.i_max);
 				break;
 			case 'm':
 				Height_PID.KI-=0.001;
-				uprintf(USART,"height_KI=%f\r\n",Height_PID.KI);
+				Height_PID.i_max=Height_Out_Max/Height_PID.KI;
+				uprintf(USART,"height_KI=%f     Height_PID.i_max=%f\r\n",Height_PID.KI,Height_PID.i_max);
 				break;
 			case 'k':
 				Height_PID.KP+=0.1;
@@ -237,7 +246,15 @@ void UART4_IRQHandler(void){
 			case 'l':
 				Height_PID.KP-=0.1;
 				uprintf(USART,"Height_PID.KP=%f\r\n",Height_PID.KP);
-				break;				
+				break;		
+			case 'g':
+				Height_PID.KD+=0.1;
+				uprintf(USART,"Height_PID.KD=%f\r\n",Height_PID.KD);
+				break;	
+			case 'h':
+				Height_PID.KD-=0.1;
+				uprintf(USART,"Height_PID.KD=%f\r\n",Height_PID.KD);
+				break;	
 			default:
 				break;
 		}

@@ -12,7 +12,8 @@ float Angle_Speed_X_Out=0;
 float Angle_Speed_Y_Out=0;
 float Angle_Speed_Z_Out=0;
 float Height_Out=0;
-#define Height_Out_Max 50
+float Pitch_Out=0;
+float Roll_Out=0;
 char Fly=0;
 
 float base_duty=30; //50
@@ -21,22 +22,22 @@ float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 //PID 结构体参数
 //带Single是单级PID
 //不带Single是串级PID，内环为角速度环，外环为角度环
-PID_S Pitch_PID_Single={2,0,0,0,0,1000}; 
-PID_S Roll_PID_Single={-2,0,0,0,0,1000};
+PID_S Pitch_PID_Single={2,0,0,0,0,1000,1}; 
+PID_S Roll_PID_Single={-2,0,0,0,0,1000,1};
 
 
-PID_S Roll_PID={0.03,0,0.0033,0,0,1000};
-PID_S Pitch_PID={-0.03,0,-0.0033,0,0,1000};
-PID_S ANGLE_SPEED_Y_PID={-3.5,-25,0,0,0,1000};
-PID_S ANGLE_SPEED_X_PID={-3.5,-25,0,0,0,1000};
-PID_S ANGLE_SPEED_Z_PID={15,0,0,0,0,1000};
-PID_S Height_PID={0.3,0,0.0002,0,0,30000};
+PID_S Roll_PID={0.03,0,0.0033,0,0,1000,1};
+PID_S Pitch_PID={-0.03,0,-0.0033,0,0,1000,1};
+PID_S ANGLE_SPEED_Y_PID={-3.5,-25,0,0,0,1000,1};
+PID_S ANGLE_SPEED_X_PID={-3.5,-25,0,0,0,1000,1};
+PID_S ANGLE_SPEED_Z_PID={15,0,0,0,0,1000,1};
+PID_S Height_PID={0.5,0,0.0055,0,0,9000,0.005};  //0.0055
 
 float Limit_Duty(float duty){
 	float max_duty=100;
 	if(Debug){
 		max_duty=50;
-	}
+	}   
 	if(duty>max_duty){
 		duty=max_duty;
 	}else if(duty<0){
@@ -55,7 +56,7 @@ float PID_Control(PID_S *PID,float target,float now){
 	
 	PID->last_err=err;
 	
-	PID->i+=err;
+	PID->i+=err*PID->i_time;
 	
 	if(PID->i>PID->i_max){
 		PID->i=PID->i_max;
@@ -114,10 +115,40 @@ void Brush_Init(){   //TIM2
 	//TIM_CtrlPWMOutputs(TIM2, ENABLE);
 }
 
+int height_cnt;  //高度环计算计数
+#define Heignt_CNT_MAX 100
+float Height_Out_Dt;
 
 void Fly_Control(){
-	float Pitch_Out=0;
-	float Roll_Out=0;
+
+	float height_out_temp;
+	float height_out_sub;
+	
+	
+	 
+	/*
+	if(height_cnt>=Heignt_CNT_MAX){	
+		height_out_temp=PID_Control(&Height_PID,height_target,height);
+		
+		//高度环限幅
+		if(height_out_temp>Height_Out_Max){
+			height_out_temp=Height_Out_Max;
+		}else if(height_out_temp<-Height_Out_Max){
+			height_out_temp=-Height_Out_Max;
+		}
+		
+		height_out_sub=height_out_temp-Height_Out;       //本次高度环与上次高度环输出做差，得到高度环改变量
+	
+		Height_Out_Dt=height_out_sub/Heignt_CNT_MAX;     //将100ms一次算出的高度环改变量，分20次加上。
+		
+		height_cnt=0;
+	}else{
+		height_cnt++;
+	}
+	
+	Height_Out+=Height_Out_Dt;
+	*/
+	
 	
 	
 	if(!Fly){
@@ -128,12 +159,18 @@ void Fly_Control(){
 		return ;
 	}
 	
-	Height_Out=PID_Control(&Height_PID,height_target,height);	
+
+
+	Height_Out=PID_Control(&Height_PID,height_target,height);
+	
+	
 	if(Height_Out>Height_Out_Max){
 		Height_Out=Height_Out_Max;
 	}else if(Height_Out<-Height_Out_Max){
 		Height_Out=-Height_Out_Max;
 	}
+	
+	
 	Roll_Out=PID_Control(&Roll_PID,roll_target,roll);
 	if(Roll_Out>20){
 		Roll_Out=20;

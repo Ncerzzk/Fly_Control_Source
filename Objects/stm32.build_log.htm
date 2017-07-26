@@ -27,16 +27,6 @@ Project File Date:  07/24/2017
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 1 (build 61)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Target 1'
-compiling SR04.c...
-user\SR04.h(5): warning:  #1295-D: Deprecated declaration Get_Height - give arg types
-  void Get_Height();
-user\SR04.h(7): warning:  #1295-D: Deprecated declaration SR04_Init - give arg types
-  void SR04_Init();
-user\SR04.h(12): warning:  #1-D: last line of file ends without a newline
-  #endif
-user\SR04.c(42): warning:  #1-D: last line of file ends without a newline
-  }
-user\SR04.c: 4 warnings, 0 errors
 compiling control.c...
 user\control.h(11): warning:  #1295-D: Deprecated declaration Brush_Init - give arg types
   void Brush_Init();
@@ -46,12 +36,14 @@ user\control.h(13): warning:  #1295-D: Deprecated declaration Roll_Control - giv
   float Roll_Control();
 user\control.h(14): warning:  #1295-D: Deprecated declaration Fly_Control - give arg types
   void Fly_Control();
-user\control.h(46): warning:  #1-D: last line of file ends without a newline
+user\control.h(55): warning:  #1-D: last line of file ends without a newline
   #endif
 user\set.h(8): warning:  #1-D: last line of file ends without a newline
   #endif
 user\i2c.h(25): warning:  #1-D: last line of file ends without a newline
   #endif
+user\mpu9250.h(123): warning:  #1295-D: Deprecated declaration MPU_init - give arg types
+  void MPU_init();
 user\angle.h(43): warning:  #1295-D: Deprecated declaration Get_Accel_Angle - give arg types
   void Get_Accel_Angle();
 user\angle.h(44): warning:  #1295-D: Deprecated declaration Get_Angle_Speed - give arg types
@@ -70,15 +62,19 @@ user\SR04.h(7): warning:  #1295-D: Deprecated declaration SR04_Init - give arg t
   void SR04_Init();
 user\SR04.h(12): warning:  #1-D: last line of file ends without a newline
   #endif
-user\control.c(194): warning:  #9-D: nested comment is not allowed
+user\control.c(124): warning:  #177-D: variable "height_out_temp" was declared but never referenced
+  	float height_out_temp;
+user\control.c(125): warning:  #177-D: variable "height_out_sub" was declared but never referenced
+  	float height_out_sub;
+user\control.c(231): warning:  #9-D: nested comment is not allowed
   /*
-user\control.c(224): warning:  #1-D: last line of file ends without a newline
+user\control.c(261): warning:  #1-D: last line of file ends without a newline
   */
-user\control.c: 19 warnings, 0 errors
+user\control.c: 21 warnings, 0 errors
 linking...
-Program Size: Code=24888 RO-data=1096 RW-data=468 ZI-data=4212  
+Program Size: Code=25296 RO-data=1096 RW-data=516 ZI-data=4212  
 FromELF: creating hex file...
-".\Objects\stm32.axf" - 0 Error(s), 22 Warning(s).
+".\Objects\stm32.axf" - 0 Error(s), 21 Warning(s).
 
 <h2>Collection of Component include folders:</h2>
   C:\Users\ncer\Desktop\×ùÍ·¾¨³ÌÐò3\RTE
