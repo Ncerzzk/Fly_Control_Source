@@ -6,6 +6,8 @@
 
 float Limit_Duty(float duty);
 
+#define Limit(value,max)     if(value>max)value=max;else if(value<-max)value=-max
+
 #define Set_Brush_Speed(CH,duty) TIM_SetCompare##CH(TIM2,Limit_Duty(duty)*4095/100)
 
 void Brush_Init();
