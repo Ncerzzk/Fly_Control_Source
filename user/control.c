@@ -16,7 +16,7 @@ float Pitch_Out=0;
 float Roll_Out=0;
 char Fly=0;
 
-float base_duty=30; //50
+float base_duty=0; //50
 float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 
 //PID 结构体参数
@@ -46,6 +46,27 @@ float Limit_Duty(float duty){
 	return duty;
 }
 
+
+
+void Set_Brushless_Speed(int ch,int duty){
+	if(ch>4||ch<1)
+		return ;
+	switch(ch){
+		case 1:
+			TIM1->CCR1=Limit_Duty(duty)*(CH_END-CH1_START)/100+CH1_START;
+			break;
+		case 2:
+			TIM1->CCR2=Limit_Duty(duty)*(CH_END-CH2_START)/100+CH2_START;
+			break;
+		case 3:
+			TIM1->CCR3=Limit_Duty(duty)*(CH_END-CH3_START)/100+CH3_START;
+			break;
+		case 4:
+			TIM1->CCR4=Limit_Duty(duty)*(CH_END-CH4_START)/100+CH4_START;
+			break;
+	}
+}
+
 float PID_Control(PID_S *PID,float target,float now){
 	float err;
 	float err_dt;
@@ -58,9 +79,7 @@ float PID_Control(PID_S *PID,float target,float now){
 	
 	PID->i+=err*PID->i_time;
 	
-	if(PID->i>PID->i_max){
-		PID->i=PID->i_max;
-	}
+	Limit(PID->i,PID->i_max);
 	
 	result = err * PID->KP  +   err_dt * PID->KD   +   PID->i * PID->KI;
 	return result;
@@ -115,6 +134,54 @@ void Brush_Init(){   //TIM2
 	//TIM_CtrlPWMOutputs(TIM2, ENABLE);
 }
 
+void Brushless_Init(){
+	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+	TIM_OCInitTypeDef  TIM_OCInitStructure;
+	GPIO_InitTypeDef GPIO_InitStructure;
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1|RCC_APB2Periph_GPIOA,ENABLE);
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8|GPIO_Pin_9|GPIO_Pin_10|GPIO_Pin_11 ;    //B3 B10 B11
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	TIM_TimeBaseStructure.TIM_Prescaler = 35;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseStructure.TIM_Period = 4999;            //f=200hz
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+
+	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
+	
+	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
+	TIM_OCInitStructure.TIM_Pulse = 0;								//duty=50%
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+	TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_Low;
+	TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
+	TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCIdleState_Reset;
+	
+	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
+	TIM_OC2Init(TIM1, &TIM_OCInitStructure);
+	TIM_OC3Init(TIM1, &TIM_OCInitStructure);
+	TIM_OC4Init(TIM1, &TIM_OCInitStructure);
+  
+	TIM_Cmd(TIM1, ENABLE);
+
+	TIM_CtrlPWMOutputs(TIM1, ENABLE);
+	
+	delay_us(5000);
+	
+	TIM1->CCR1=20;
+	TIM1->CCR2=20;
+	TIM1->CCR3=20;
+	TIM1->CCR4=20;
+	
+	
+}
 int height_cnt;  //高度环计算计数
 #define Heignt_CNT_MAX 100
 float Height_Out_Dt;
@@ -152,110 +219,43 @@ void Fly_Control(){
 	
 	
 	if(!Fly){
-		Set_Brush_Speed(1,0);
-		Set_Brush_Speed(2,0);
-		Set_Brush_Speed(3,0);
-		Set_Brush_Speed(4,0);		
+		Brushless_Stop();
 		return ;
 	}
 	
 
 
-	Height_Out=PID_Control(&Height_PID,height_target,height);
-	
-	
-	if(Height_Out>Height_Out_Max){
-		Height_Out=Height_Out_Max;
-	}else if(Height_Out<-Height_Out_Max){
-		Height_Out=-Height_Out_Max;
-	}
-	
-	
-	Roll_Out=PID_Control(&Roll_PID,roll_target,roll);
-	if(Roll_Out>20){
-		Roll_Out=20;
-	}else if(Roll_Out<-20){
-		Roll_Out=-20;
-	}
-	
+//	Height_Out=PID_Control(&Height_PID,height_target,height);
+//	Limit(Height_Out,Height_Out_Max);
+//	
+//	Roll_Out=PID_Control(&Roll_PID,roll_target,roll);
+//	Limit(Roll_Out,20);
+
 	Angle_Speed_X_Out=PID_Control(&ANGLE_SPEED_X_PID,Roll_Out,angle_speed_X);
 	
 	
 	
-	Pitch_Out=PID_Control(&Pitch_PID,pitch_target,pitch);
-	if(Pitch_Out>20){
-		Pitch_Out=20;
-	}else if(Pitch_Out<-20){
-		Pitch_Out=-20;
-	}
+//	Pitch_Out=PID_Control(&Pitch_PID,pitch_target,pitch);
+//	Limit(Pitch_Out,20);
+	
 	Angle_Speed_Y_Out=PID_Control(&ANGLE_SPEED_Y_PID,Pitch_Out,angle_speed_Y);
-	Angle_Speed_Z_Out=PID_Control(&ANGLE_SPEED_Z_PID,0,angle_speed_Z);
+//	Angle_Speed_Z_Out=PID_Control(&ANGLE_SPEED_Z_PID,0,angle_speed_Z);
+//	
 	
-	
-	/*
-	//单级PID
-	CH1_Out=Pitch_Out-Roll_Out;  //以角度向前倾，向左倾为标准
-	CH2_Out=-Pitch_Out-Roll_Out;
-	CH3_Out=-Pitch_Out+Roll_Out;
-	CH4_Out=Pitch_Out+Roll_Out;
-	*/
 	
 	//串级PID
-	CH1_Out=-Angle_Speed_X_Out+Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty+7+Height_Out;  //以角度向前倾，向左倾为标准
+	CH1_Out=-Angle_Speed_X_Out+Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty+Height_Out;  //以角度向前倾，向左倾为标准
 	CH2_Out=-Angle_Speed_X_Out-Angle_Speed_Y_Out-Angle_Speed_Z_Out+base_duty+Height_Out;
 	CH3_Out=Angle_Speed_X_Out-Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty+Height_Out;
 	CH4_Out=Angle_Speed_X_Out+Angle_Speed_Y_Out-Angle_Speed_Z_Out+base_duty+Height_Out;
 	
-	Set_Brush_Speed(1,CH1_Out);
-	Set_Brush_Speed(2,CH2_Out);
-	Set_Brush_Speed(3,CH3_Out);
-	Set_Brush_Speed(4,CH4_Out);
-}
-	/*
-	if(Fly){
-		Set_Brush_Speed(1,CH1_Out);
-		Set_Brush_Speed(2,CH2_Out);
-		Set_Brush_Speed(3,CH3_Out);
-		Set_Brush_Speed(4,CH4_Out);
-	}else{
-		Set_Brush_Speed(1,0);
-		Set_Brush_Speed(2,0);
-		Set_Brush_Speed(3,0);
-		  Set_Brush_Speed(4,0);
-	}*
-	
+	Set_Motor_Speed(1,CH1_Out);
+	Set_Motor_Speed(2,CH2_Out);
+	Set_Motor_Speed(3,CH3_Out);
+	Set_Motor_Speed(4,CH4_Out);
 }
 
-
-
-/*
-
-#define SINGLE_PID 1    //单级PID
-float pitch_P=2;
-float pitch_D=0;
-float pitch_I=0;
-float pitch_err_integral;
-float last_pitch_err;
-#define INTEGRAL_MAX 1000
-float Pitch_Control(){
-	float pitch_err;
-	float pitch_err_dt;
-	pitch_err=pitch_target-pitch;
-	pitch_err_dt=pitch_err-last_pitch_err;
-	pitch_err_integral+=pitch_err;
 	
-	last_pitch_err=pitch_err;
-	
-	if(pitch_err_integral>INTEGRAL_MAX){
-		pitch_err_integral=INTEGRAL_MAX;
-	}
-	
-	return pitch_err*pitch_P+pitch_err_dt*pitch_D+pitch_err_integral*pitch_I;
-}
-
-float Roll_Control(){
-	return 0;
-}
 
 
-*/
+

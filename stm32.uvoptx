@@ -168,16 +168,32 @@
           <Type>0</Type>
           <LineNumber>33</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134237538</Address>
+          <Address>134237070</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\ncer\Desktop\搴уご椴哥▼搴?\user\main.c</Filename>
+          <Filename>C:\Users\ncer\Desktop\缁块菠楸?user\main.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\stm32\user/main.c\33</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>187</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134232840</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>C:\Users\ncer\Desktop\缁块菠楸?user\main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\stm32\user/main.c\187</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -230,6 +246,11 @@
           <count>9</count>
           <WinNumber>1</WinNumber>
           <ItemText>Height_PID</ItemText>
+        </Ww>
+        <Ww>
+          <count>10</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>((TIM_TypeDef *) ((((uint32_t)0x40000000) + 0x10000) + 0x2C00))-&gt;CCR2</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
