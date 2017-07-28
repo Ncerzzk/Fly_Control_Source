@@ -4,15 +4,18 @@
 
 #define BRUSHLESS
 
+#define I_TIME 0.005
+#define DUTY_MAX 100
+
   //电调 10初始化  2 3号260启动  1、4号300 500最大
 	
 #ifdef BRUSHLESS
 	#define CH1_START	300
-	#define CH2_START 260
-	#define CH3_START 260
+	#define CH2_START 270
+	#define CH3_START 270
 	#define CH4_START 300
 	
-	#define CH_END 500
+	#define CH_END 520         //CH3 540  CH2 540
 #endif
 
 
@@ -54,7 +57,6 @@ typedef struct{
 	float i;
 	float last_err;
 	float i_max;
-	float i_time;
 }PID_S;
 
 void clear_i(PID_S * temp);
@@ -81,5 +83,5 @@ extern float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 extern float Height_Out;
 extern float Pitch_Out;
 extern float Roll_Out;
-#define clear_i(a) a.i=0
+#define clear_i(PID) PID.i=0;PID.i_max=DUTY_MAX/(abs(PID.KI)==0.0?0.001:abs(PID.KI))
 #endif

@@ -58,12 +58,12 @@ void main(){
 		*/
 			if(Send_Angle){
 				//send_wave((int)pitch,(int)roll,(int)yaw,(int)Height_Out);//标定角度正方向
-				send_wave((int)angle_speed_X,(int)angle_speed_Y,(int)angle_speed_Z,0);//标定角速度正方向
+				//send_wave((int)angle_speed_X,(int)angle_speed_Y,(int)angle_speed_Z,0);//标定角速度正方向
 				    
 				//send_wave((int)Angle_Speed_X_Out,(int)Angle_Speed_Y_Out,0,0);
 				//send_wave((int)CH1_Out,(int)Pitch_Out,(int)Roll_PID.i,(int)Pitch_PID.i);
 				//send_wave((int)CH1_Out,(int)CH2_Out,(int)CH3_Out,(int)CH4_Out);
-				//send_wave((int)Pitch_Out,(int)Roll_Out,(int)Angle_Speed_X_Out,(int)Angle_Speed_Y_Out);
+				send_wave((int)ANGLE_SPEED_X_PID.i*100,(int)ANGLE_SPEED_Y_PID.i*100,(int)pitch,(int)roll);
 			}
 			//uprintf(USART,"Height:%f\r\n",height);
 	}
@@ -184,13 +184,14 @@ void UART4_IRQHandler(void){
 				uprintf(USART,"pitch_P=%f    roll_P=%f \r\n",Pitch_PID.KP,Roll_PID.KP);
 				break;
 			case 'a':
+
 				Set_Brushless_Speed(1,10);
 				Set_Brushless_Speed(2,10);
 				Set_Brushless_Speed(3,10);
 				Set_Brushless_Speed(4,10);
 				//base_duty+=0.3;
 				//uprintf(USART,"base_duty=%f\r\n",base_duty);
-				uprintf(USART,"CCR2=%d\r\n",TIM1->CCR2);
+				uprintf(USART,"CCR=%d\r\n",TIM1->CCR1);
 				break;
 			case 'b':
 				Brushless_Stop();
@@ -199,12 +200,14 @@ void UART4_IRQHandler(void){
 				//uprintf(USART,"base_duty=%f\r\n",base_duty);
 				break;
 			case 'i':
-				pitch_target+=0.5;
-				uprintf(USART,"pitch_target=%f\r\n",pitch_target);
+				ANGLE_SPEED_X_PID.KD+=0.1;
+				ANGLE_SPEED_Y_PID.KD+=0.1;
+				uprintf(USART,"ANGLE_SPEED_X_PID.KD=%f\r\n",ANGLE_SPEED_X_PID.KD);
 				break;
 			case 'o':
-				pitch_target-=0.5;
-				uprintf(USART,"pitch_target=%f\r\n",pitch_target);
+				ANGLE_SPEED_X_PID.KD-=0.1;
+				ANGLE_SPEED_Y_PID.KD-=0.1;
+				uprintf(USART,"ANGLE_SPEED_X_PID.KD=%f\r\n",ANGLE_SPEED_X_PID.KD);
 				break;	
 			case 'e':
 				roll_target+=0.5;
@@ -215,15 +218,15 @@ void UART4_IRQHandler(void){
 				uprintf(USART,"roll_target=%f\r\n",roll_target);
 				break;
 			case 'z':
-				ANGLE_SPEED_X_PID.KI-=0.001;
-				ANGLE_SPEED_Y_PID.KI-=0.001;
+				ANGLE_SPEED_X_PID.KI-=0.1;
+				ANGLE_SPEED_Y_PID.KI-=0.1;
 				clear_i(ANGLE_SPEED_X_PID);
 				clear_i(ANGLE_SPEED_Y_PID);
 				uprintf(USART,"angle_speed_ki=%f\r\n",ANGLE_SPEED_X_PID.KI);
 				break;
 			case 'x':
-				ANGLE_SPEED_X_PID.KI+=0.001;
-				ANGLE_SPEED_Y_PID.KI+=0.001;
+				ANGLE_SPEED_X_PID.KI+=0.1;
+				ANGLE_SPEED_Y_PID.KI+=0.1;
 				clear_i(ANGLE_SPEED_X_PID);
 				clear_i(ANGLE_SPEED_Y_PID);
 				uprintf(USART,"angle_speed_ki=%f\r\n",ANGLE_SPEED_X_PID.KI);
@@ -263,10 +266,23 @@ void UART4_IRQHandler(void){
 				uprintf(USART,"Height_PID.KD=%f\r\n",Height_PID.KD);
 				break;	
 			case 'y':
-				ANGLE_SPEED_X_PID.KP-=1;
+				ANGLE_SPEED_X_PID.KP-=0.1;
+				ANGLE_SPEED_Y_PID.KP-=0.1;
+				uprintf(USART,"ANGLE_SPEED_X_PID.KP=%f\r\n",ANGLE_SPEED_X_PID.KP);
 				break;
 			case 'u':
+				ANGLE_SPEED_X_PID.KP+=0.1;
+				ANGLE_SPEED_Y_PID.KP+=0.1;
+				uprintf(USART,"ANGLE_SPEED_X_PID.KP=%f\r\n",ANGLE_SPEED_X_PID.KP);
 				break;
+			case '1':
+				Roll_PID.KD+=0.01;
+				uprintf(USART,"Roll_PID.KD=%f\r\n",Roll_PID.KD);	
+				break;
+			case '2':
+				Roll_PID.KD-=0.01;
+				uprintf(USART,"Roll_PID.KD=%f\r\n",Roll_PID.KD);	
+				break;				
 			default:
 				break;
 		}
