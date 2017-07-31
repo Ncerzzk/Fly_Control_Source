@@ -6,6 +6,15 @@
 #define Semig 1e-6
 #define GY521 1
 
+
+float a_x_offset=0;
+float a_y_offset=0;
+float a_z_offset=0;
+float w_x_offset,w_y_offset,w_z_offset;
+
+u8 Pram_Error=0;
+	
+	
 s16 gyro_X,gyro_Y,gyro_Z;     //陀螺仪读出的16位有符号数
 s16 accel_X,accel_Y,accel_Z;  //加速度计读出的16位有符号数
 float roll_accel,pitch_accel;
@@ -29,8 +38,18 @@ float IMU_P=2;
 float IMU_I=0.005;
 double pitch,roll,yaw;
 
+float BMP_height;
 
-
+void BMP_Get_Height(){
+	float temp;
+	float sub;
+	if(!BMP_OPEN)
+		return ;
+	BMP_height=(float)BMP_Get_Data();
+	BMP_height=BMP_HEIGHT_CONSTANT-BMP_height;
+	BMP_height*=8;
+	BMP_height/=100;
+}
 
 
 
@@ -43,28 +62,12 @@ void Get_Accel_Angle(){
 	accel_X=Get_Accel_X();
 	accel_Y=Get_Accel_Y();
 	accel_Z=Get_Accel_Z();
-
-	
-	/*if(accel_Z!=0){
-		roll_accel=asin((float)accel_X*ACCEL_Range/32768.0/9.8)*57.32;
-		pitch_accel=atan2((float)accel_Y,(float)accel_Z)*57.32;
-	}*/
 	
 	accel_speed_X=((float)accel_X)*ACCEL_Range/32768.0;
 	accel_speed_Y=((float)accel_Y)*ACCEL_Range/32768.0;
 	accel_speed_Z=((float)accel_Z)*ACCEL_Range/32768.0;
 	
-	
-	
-	//uprintf(USART1,"%f       kal:%f  \r\n",accel_speed_X,);
-	
 }
-
-
-/*
-	由陀螺仪获取偏航角
-*/
-
 
 /*
 	陀螺仪采集函数
@@ -75,20 +78,70 @@ void Get_Angle_Speed(){
 	gyro_Z=Get_Gyro_Z();
 	
 	//卡尔曼之后，归一化
-	angle_speed_X=((float)gyro_X)*GYRO_Range/32768.0/57.32;
-	angle_speed_Y=((float)gyro_Y)*GYRO_Range/32768.0/57.32;
-	angle_speed_Z=((float)gyro_Z)*GYRO_Range/32768.0/57.32;
+	angle_speed_X=((float)gyro_X)*GYRO_Range/32768.0/57.32-w_x_offset;
+	angle_speed_Y=((float)gyro_Y)*GYRO_Range/32768.0/57.32-w_y_offset;
+	angle_speed_Z=((float)gyro_Z)*GYRO_Range/32768.0/57.32-w_z_offset;
 	
 }
 
+/*
+	自检陀螺仪，获取零偏
+*/
+
+
+#define Pram_Size 6
+float Prams[Pram_Size];
+
+void Adjust_Gyro(){
+
+	int i;
+	float w_x_sum=0,w_y_sum=0,w_z_sum=0;
+	
+	TIM_ITConfig(TIM6, TIM_IT_Update, DISABLE);
+	
+	for(i=0;i<100;++i){
+		
+		Get_Angle_Speed();
+		w_x_sum+=angle_speed_X+w_x_offset;
+		w_y_sum+=angle_speed_Y+w_y_offset;
+		w_z_sum+=angle_speed_Z+w_z_offset;
+		delay_us(2000);  //delay_2ms
+	}
+	
+	
+
+	
+	w_x_offset=w_x_sum/100;
+	w_y_offset=w_y_sum/100;
+	w_z_offset=w_z_sum/100;
+	
+
+	
+	uprintf(USART,"adjust gyro successful!\r\n");
+	
+	TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
+}
+
+u8 Adjust_Acc_State=0;
+#define COMPARE(MAX,B,MIN) if(B>MAX)MAX=B;else if(B<MIN)MIN=B
+float ac_x_max,ac_x_min,ac_y_max,ac_y_min,ac_z_max,ac_z_min;
+//void Adjust_Acc(){
+
+//	if(Adjust_Acc_State){
+//		COMPARE(ac_x_max,accel_speed_X,ac_x_min);
+//		COMPARE(ac_y_max,accel_speed_Y,ac_y_min);
+//		COMPARE(ac_z_max,accel_speed_Z,ac_z_min);
+//	}
+
+
+//}
 
 
 /*
 	将参数保存至扇区
 	保存三轴陀螺仪的灵漂
 */
-#define Pram_Size 5
-float Prams[Pram_Size];
+
 
 void Write_Prams(){
 	int i;
@@ -97,23 +150,57 @@ void Write_Prams(){
 	FLASH_Unlock();
 	FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_EOP|FLASH_FLAG_PGERR |FLASH_FLAG_WRPRTERR);
 	FLASHStatus = FLASH_ErasePage(FLASH_Start); //擦除一页
+
+	a_x_offset=(ac_x_max+ac_x_min)/2;
+	a_y_offset=(ac_y_max+ac_y_min)/2;
+	a_z_offset=(ac_z_max+ac_z_min)/2;	
 	
+	Prams[0]=a_x_offset;
+	Prams[1]=a_y_offset;
+	Prams[2]=w_x_offset;
+	Prams[3]=w_y_offset;
+	Prams[4]=w_z_offset;	
+	Prams[5]=a_z_offset;
 	
 	for(i=0;i<Pram_Size;++i){
 		temp=*((u32 *)(Prams+i));
 		FLASHStatus = FLASH_ProgramWord(FLASH_Start+i*4, temp);
-		uprintf(USART1,"write+%f\r\n",Prams[i]);
+		uprintf(USART,"write %f\r\n",Prams[i]);
 	}
 	
 	FLASH_Lock();
 }
 
+#define Error_Check(a,max_error) if(a>max_error||a<-max_error||isnan(a))a=0;
+
 void Load_Prams(){
 	int i;
 	for(i=0;i<Pram_Size;++i){
 		Prams[i]=*(float* )(FLASH_Start+i*4);
-		uprintf(USART1,"Load Pram:%f\r\n",Prams[i]);
+		uprintf(USART,"Load Pram:%f\r\n",Prams[i]);
 	}
+
+	a_x_offset=Prams[0];
+	a_y_offset=Prams[1];
+	w_x_offset=Prams[2];
+	w_y_offset=Prams[3];
+	w_z_offset=Prams[4];	
+	a_z_offset=Prams[5];
+	
+	Error_Check(w_x_offset,2);
+	Error_Check(w_y_offset,2);
+	Error_Check(w_z_offset,2);
+
+	Error_Check(a_x_offset,2);
+	Error_Check(a_y_offset,2);
+	Error_Check(a_z_offset,2);
+	
+	if(!w_x_offset||!w_y_offset||!w_z_offset){
+		uprintf(USART,"load offset error!please adjust again!\r\n");
+		
+		Pram_Error=1;
+	}
+
 }
 
 //获取偏航角度（磁力计）
@@ -154,6 +241,8 @@ void Get_Angle(){
 	
 }
 
+
+
 void IMU_Update(float ax,float ay,float az,float wx,float wy,float wz){
 	float norm;
 	float gbx,gby,gbz;
@@ -174,9 +263,9 @@ void IMU_Update(float ax,float ay,float az,float wx,float wy,float wz){
 		return ;
 	ax/=norm;
 	ay/=norm;
-	az/=norm;
+	az/=norm; 
 	
-	//计算重力加速度旋转到机体坐标系后的值
+	//计算重力加速度旋转到机体坐标系后的值,即以当前估计的姿态作为旋转矩阵
 	gbx= 2*(q1q3 - q0q2);
 	gby= 2*(q0q1 + q2q3);
 	gbz= q0q0 - q1q1 - q2q2 + q3q3;

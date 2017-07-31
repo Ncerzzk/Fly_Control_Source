@@ -6,6 +6,7 @@
 #include "stm32f10x.h"
 #include "stm32f10x_i2c.h"
 
+#define I2C_USE			I2C1
 
 typedef enum dataType{
 	MSB_First=1,    //高位在前

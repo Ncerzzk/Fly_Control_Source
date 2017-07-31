@@ -32,7 +32,7 @@ void main(){
 	SR04_Init();
 	Brushless_Init();
 	//Brush_Init();
-	//Load_Prams();
+	Load_Prams();
 	uprintf(USART,"in  it ok!\r\n");
 	
 	//uprintf(USART1,"mode=%d\r\nstate=%d\r\n",mode,state);
@@ -57,13 +57,14 @@ void main(){
 		3、根据此正方向，修改PID中参数的符号
 		*/
 			if(Send_Angle){
-				//send_wave((int)pitch,(int)roll,(int)yaw,(int)Height_Out);//标定角度正方向
-				//send_wave((int)angle_speed_X,(int)angle_speed_Y,(int)angle_speed_Z,0);//标定角速度正方向
+				send_wave((int)(pitch*10),(int)(roll*10),(int)(ANGLE_SPEED_X_PID.last_d*100),(int)(ANGLE_SPEED_X_PID.i*100));//标定角度正方向
+				//send_wave((int)(angle_speed_X*100),(int)(angle_speed_Y*100),(int)(angle_speed_Z*100),0);//标定角速度正方向
 				    
 				//send_wave((int)Angle_Speed_X_Out,(int)Angle_Speed_Y_Out,0,0);
 				//send_wave((int)CH1_Out,(int)Pitch_Out,(int)Roll_PID.i,(int)Pitch_PID.i);
 				//send_wave((int)CH1_Out,(int)CH2_Out,(int)CH3_Out,(int)CH4_Out);
-				send_wave((int)ANGLE_SPEED_X_PID.i*100,(int)ANGLE_SPEED_Y_PID.i*100,(int)pitch,(int)roll);
+				//send_wave((int)Angle_Speed_Y_Out,(int)Angle_Speed_X_Out,(int)pitch,(int)roll);
+				//send_wave((int)Angle_Speed_X_Out,(int)(ANGLE_SPEED_X_PID.i*100),(int)(angle_speed_X*10),(int)roll);
 			}
 			//uprintf(USART,"Height:%f\r\n",height);
 	}
@@ -132,6 +133,7 @@ void TIM6_IRQHandler(void){
 				break;
 			case 3:
 				Fly_Control();
+				//Adjust_Acc();
 				//uprintf(USART,"test\r\n");
 				break;
 			case 4:
@@ -185,19 +187,19 @@ void UART4_IRQHandler(void){
 				break;
 			case 'a':
 
-				Set_Brushless_Speed(1,10);
-				Set_Brushless_Speed(2,10);
-				Set_Brushless_Speed(3,10);
-				Set_Brushless_Speed(4,10);
-				//base_duty+=0.3;
-				//uprintf(USART,"base_duty=%f\r\n",base_duty);
-				uprintf(USART,"CCR=%d\r\n",TIM1->CCR1);
+//				Set_Brushless_Speed(1,10);
+//				Set_Brushless_Speed(2,10);
+//				Set_Brushless_Speed(3,10);
+//				Set_Brushless_Speed(4,10);
+				base_duty+=0.3;
+				uprintf(USART,"base_duty=%f\r\n",base_duty);
+//				uprintf(USART,"CCR=%d\r\n",TIM1->CCR1);
 				break;
 			case 'b':
-				Brushless_Stop();
-				uprintf(USART,"CCR2=%d\r\n",TIM1->CCR2);
-				//base_duty-=0.3;
-				//uprintf(USART,"base_duty=%f\r\n",base_duty);
+//				Brushless_Stop();
+//				uprintf(USART,"CCR2=%d\r\n",TIM1->CCR2);
+				base_duty-=0.3;
+				uprintf(USART,"base_duty=%f\r\n",base_duty);
 				break;
 			case 'i':
 				ANGLE_SPEED_X_PID.KD+=0.1;
@@ -210,11 +212,11 @@ void UART4_IRQHandler(void){
 				uprintf(USART,"ANGLE_SPEED_X_PID.KD=%f\r\n",ANGLE_SPEED_X_PID.KD);
 				break;	
 			case 'e':
-				roll_target+=0.5;
+				roll_target+=0.1;
 				uprintf(USART,"roll_target=%f\r\n",roll_target);
 				break;					
 			case 'r':
-				roll_target-=0.5;
+				roll_target-=0.1;
 				uprintf(USART,"roll_target=%f\r\n",roll_target);
 				break;
 			case 'z':
@@ -266,23 +268,64 @@ void UART4_IRQHandler(void){
 				uprintf(USART,"Height_PID.KD=%f\r\n",Height_PID.KD);
 				break;	
 			case 'y':
-				ANGLE_SPEED_X_PID.KP-=0.1;
+				ANGLE_SPEED_X_PID.KP-=0.1;	//内环P
 				ANGLE_SPEED_Y_PID.KP-=0.1;
 				uprintf(USART,"ANGLE_SPEED_X_PID.KP=%f\r\n",ANGLE_SPEED_X_PID.KP);
 				break;
 			case 'u':
-				ANGLE_SPEED_X_PID.KP+=0.1;
+				ANGLE_SPEED_X_PID.KP+=0.1;  //内环P
 				ANGLE_SPEED_Y_PID.KP+=0.1;
 				uprintf(USART,"ANGLE_SPEED_X_PID.KP=%f\r\n",ANGLE_SPEED_X_PID.KP);
 				break;
 			case '1':
-				Roll_PID.KD+=0.01;
+				Roll_PID.KD+=0.01; //外环D
 				uprintf(USART,"Roll_PID.KD=%f\r\n",Roll_PID.KD);	
 				break;
 			case '2':
-				Roll_PID.KD-=0.01;
+				Roll_PID.KD-=0.01;    //外环D
 				uprintf(USART,"Roll_PID.KD=%f\r\n",Roll_PID.KD);	
-				break;				
+				break;			
+			case '3':
+				Adjust_Gyro();  //取陀螺仪零偏
+				
+				break;
+			case '4':
+				Load_Prams();
+				break;
+			case '5':
+				Write_Prams();  //写参数 
+				break;
+			
+			case '6':
+				Adjust_Acc_State=!Adjust_Acc_State;
+				if(Adjust_Acc_State){
+					uprintf(USART,"adjust acc start!\r\n");
+				}
+				else{
+					uprintf(USART,"adjust acc successful!\r\n");
+					uprintf(USART,"A_X0:%f\r\nA_Y0:%f\r\nA_Z0:%f\r\n",a_x_offset,a_y_offset,a_z_offset);
+				}
+				break;
+			case '7':
+				roll_target=10;
+				uprintf(USART,"roll_target =10!!\r\n");
+				break;
+			case '8':
+				roll_target=0;
+				uprintf(USART,"roll_target =0!!\r\n");
+				break;
+			case '9':
+				Roll_Out=0;
+				uprintf(USART,"roll_out =0!!\r\n");
+				break;
+			case '0':
+				Roll_Out=5;
+				uprintf(USART,"roll_out =5!!\r\n");
+				break;
+			case 'w':
+				base_duty=30;
+				uprintf(USART,"base duty =30!!\r\n");
+				break;
 			default:
 				break;
 		}

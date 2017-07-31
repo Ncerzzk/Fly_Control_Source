@@ -40,6 +40,7 @@
 ".\objects\hspi.o"
 ".\objects\set.o"
 ".\objects\sr04.o"
+".\objects\ms5611.o"
 --strict --scatter ".\Objects\stm32.sct"
 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

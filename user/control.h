@@ -57,6 +57,7 @@ typedef struct{
 	float i;
 	float last_err;
 	float i_max;
+	float last_d;
 }PID_S;
 
 void clear_i(PID_S * temp);
@@ -83,5 +84,5 @@ extern float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 extern float Height_Out;
 extern float Pitch_Out;
 extern float Roll_Out;
-#define clear_i(PID) PID.i=0;PID.i_max=DUTY_MAX/(abs(PID.KI)==0.0?0.001:abs(PID.KI))
+#define clear_i(PID) PID.i=0//;PID.i_max=DUTY_MAX/10/(abs(PID.KI)==0.0?0.001:abs(PID.KI))
 #endif

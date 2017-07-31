@@ -3,15 +3,10 @@
 
 #include "i2c.h"
 
-#define MPU_Address   0xD0
-#define MAG_Address 	0x18
 
-#define I2C_USE			I2C1
-
-#define BMP_OPEN	1
 
 #define	SMPLRT_DIV		0x19	//陀螺仪采样率，典型值：0x01(500Hz)
-//采样频率=陀螺仪输出频率/1+SMPLRT_DIV     陀螺仪输出频率当低通滤波不开的时候为8KHZ，当低通开的时候为1K
+//采样频率=陀螺仪输出频率/(1+SMPLRT_DIV )    陀螺仪输出频率当低通滤波不开的时候为8KHZ，当低通开的时候为1K
 
 #define	CONFIG			0x1A	//低通滤波频率，典型值：0x01(188Hz)
 #define	GYRO_CONFIG		0x1B	//陀螺仪自检及测量范围，典型值：0x18(不自检，2000deg/s)
@@ -34,6 +29,17 @@
 #define	PWR_MGMT_1		0x6B	//电源管理，典型值：0x00(正常启用)
 #define	WHO_AM_I			0x75	//IIC地址寄存器(默认数值0x68，只读)
 
+#define GYRO_Range_Configure 0x8   //0x10
+#define GYRO_Range 500
+
+#define ACCEL_Range_Configure 0x1  
+#define ACCEL_Range 2*9.8
+
+
+
+#define MPU_Address   0xD0
+#define MAG_Address 	0x18
+
 #define MAG_XOUT_L		0x03
 #define MAG_XOUT_H		0x04
 #define MAG_YOUT_L		0x05
@@ -47,12 +53,10 @@
 #define MAG_ASAY			0x11
 #define MAG_ASAZ			0x12
 
-#define GYRO_Range_Configure 0x8   //0x10
-#define GYRO_Range 500
 
-#define ACCEL_Range_Configure 0x1  
-#define ACCEL_Range 2*9.8
 
+
+#define BMP_OPEN	1
 #define BMP_Address 												 0xEC  
 
 #define BMP280_DIG_T1_LSB_REG                0x88  
@@ -122,7 +126,7 @@ typedef enum{
 
 void MPU_init();
 float Gyro_Normalize(s16 gyro);
-
+double BMP_Get_Data();
 
 #endif
 

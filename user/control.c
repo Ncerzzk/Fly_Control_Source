@@ -4,8 +4,8 @@
 #include "SR04.h"
 
 //期望的俯仰、横滚、偏航角
-float pitch_target=0;     //3.25
-float roll_target=0;  //48.5
+float pitch_target=-0.6;     //3.25
+float roll_target=0.4;  //48.5
 float yaw_target=0;
 float height_target=80;   //单位cm
 float Angle_Speed_X_Out=0;
@@ -16,7 +16,7 @@ float Pitch_Out=0;
 float Roll_Out=0;
 char Fly=0;
 
-float base_duty=10; //50
+float base_duty=20; //50
 float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 
 //PID 结构体参数
@@ -26,11 +26,11 @@ PID_S Pitch_PID_Single={2,0,0,0,0,1000};
 PID_S Roll_PID_Single={-2,0,0,0,0,1000};
 
 
-PID_S Roll_PID={0.15,0,0,0,0,1000};
-PID_S Pitch_PID={-0.15,0,0,0,0,1000};
-PID_S ANGLE_SPEED_Y_PID={-8.6,-91,-5,0,0,2};
-PID_S ANGLE_SPEED_X_PID={-8.6,-91,-5,0,0,2};
-PID_S ANGLE_SPEED_Z_PID={15,0,0,0,0,1000};
+PID_S Roll_PID={0.25,0,0,0,0,1000};
+PID_S Pitch_PID={-0.25,0,0,0,0,1000};
+PID_S ANGLE_SPEED_Y_PID={-5,-60,-1,0,0,5};
+PID_S ANGLE_SPEED_X_PID={-5,-60,-1,0,0,5};
+PID_S ANGLE_SPEED_Z_PID={10,0,0,0,0,1000};
 PID_S Height_PID={0.5,0,0.0055,0,0,9000};  //0.0055
 
 float Limit_Duty(float duty){
@@ -75,11 +75,15 @@ float PID_Control(PID_S *PID,float target,float now){
 	
 	err_dt=err-PID->last_err;
 	
+	err_dt*=0.384;
+	err_dt+=PID->last_d*0.615;
+	
 	PID->last_err=err;
 	
 	PID->i+=err*I_TIME;
 	
 	Limit(PID->i,PID->i_max);
+	PID->last_d=err_dt;
 	
 	result = err * PID->KP  +   err_dt * PID->KD   +   PID->i * PID->KI;
 	return result;
@@ -191,7 +195,10 @@ void Fly_Control(){
 	float height_out_temp;
 	float height_out_sub;
 	
-
+	if(!Fly||Pram_Error){
+		Brushless_Stop();
+		return ;
+	}
 	 
 	/*
 	if(height_cnt>=Heignt_CNT_MAX){	
@@ -216,28 +223,26 @@ void Fly_Control(){
 	Height_Out+=Height_Out_Dt;
 	*/
 	
-	if(!Fly){
-		Brushless_Stop();
-		return ;
-	}	
+
 
 
 //	Height_Out=PID_Control(&Height_PID,height_target,height);
 //	Limit(Height_Out,Height_Out_Max);
 //	
 	Roll_Out=PID_Control(&Roll_PID,roll_target,roll);
-	Limit(Roll_Out,20);
+	Limit(Roll_Out,10);
 
 	Angle_Speed_X_Out=PID_Control(&ANGLE_SPEED_X_PID,Roll_Out,angle_speed_X);
 	
 	
 	
 	Pitch_Out=PID_Control(&Pitch_PID,pitch_target,pitch);
-	Limit(Pitch_Out,20);
+	Limit(Pitch_Out,10);
 	
 	Angle_Speed_Y_Out=PID_Control(&ANGLE_SPEED_Y_PID,Pitch_Out,angle_speed_Y);
-//	Angle_Speed_Z_Out=PID_Control(&ANGLE_SPEED_Z_PID,0,angle_speed_Z);
+	Angle_Speed_Z_Out=PID_Control(&ANGLE_SPEED_Z_PID,0,angle_speed_Z);
 //	
+	
 
 
 	//串级PID
