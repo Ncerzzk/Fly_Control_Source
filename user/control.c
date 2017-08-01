@@ -11,6 +11,7 @@ float height_target=80;   //单位cm
 float Angle_Speed_X_Out=0;
 float Angle_Speed_Y_Out=0;
 float Angle_Speed_Z_Out=0;
+float Accel_Speed_Z_Out=0; //加速度环 高度环的内环
 float Height_Out=0;
 float Pitch_Out=0;
 float Roll_Out=0;
@@ -26,8 +27,9 @@ PID_S Pitch_PID_Single={2,0,0,0,0,1000};
 PID_S Roll_PID_Single={-2,0,0,0,0,1000};
 
 
-PID_S Roll_PID={0.25,0,0,0,0,1000};
-PID_S Pitch_PID={-0.25,0,0,0,0,1000};
+PID_S Roll_PID={0.25,0,0.1,0,0,2};
+PID_S Pitch_PID={-0.25,0,-0.1,0,0,2};
+PID_S ACCEL_SPEED_Z_PID={0};
 PID_S ANGLE_SPEED_Y_PID={-5,-60,-1,0,0,5};
 PID_S ANGLE_SPEED_X_PID={-5,-60,-1,0,0,5};
 PID_S ANGLE_SPEED_Z_PID={10,0,0,0,0,1000};
@@ -229,6 +231,8 @@ void Fly_Control(){
 //	Height_Out=PID_Control(&Height_PID,height_target,height);
 //	Limit(Height_Out,Height_Out_Max);
 //	
+//	Accel_Speed_Z_Out=PID_Control(&ACCEL_SPEED_Z_PID,Height_Out,accel_speed_Z);
+	
 	Roll_Out=PID_Control(&Roll_PID,roll_target,roll);
 	Limit(Roll_Out,10);
 
@@ -258,6 +262,65 @@ void Fly_Control(){
 }
 
 	
+#define COMPARE(MAX,B,MIN) if(B>MAX)MAX=B;else if(B<MIN)MIN=B
 
+float Prams[Pram_Size];
+/*
+	将参数保存至扇区
+	保存三轴陀螺仪的灵漂
+*/
+
+
+void Write_Prams(){
+	int i;
+	u32 temp;
+	FLASH_Status FLASHStatus;
+	FLASH_Unlock();
+	FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_EOP|FLASH_FLAG_PGERR |FLASH_FLAG_WRPRTERR);
+	FLASHStatus = FLASH_ErasePage(FLASH_Start); //擦除一页
+
+	
+	Prams[0]=pitch_target;
+	Prams[1]=roll_target;
+	Prams[2]=w_x_offset;
+	Prams[3]=w_y_offset;
+	Prams[4]=w_z_offset;	
+	
+	for(i=0;i<Pram_Size;++i){
+		temp=*((u32 *)(Prams+i));
+		FLASHStatus = FLASH_ProgramWord(FLASH_Start+i*4, temp);
+		uprintf(USART,"write %f\r\n",Prams[i]);
+	}
+	
+	FLASH_Lock();
+}
+u8 Pram_Error=0;
+#define Error_Check(a,max_error) if(a>max_error||a<-max_error||isnan(a)){a=0;Pram_Error=1;}
+
+void Load_Prams(){
+	int i;
+	for(i=0;i<Pram_Size;++i){
+		Prams[i]=*(float* )(FLASH_Start+i*4);
+		uprintf(USART,"Load Pram:%f\r\n",Prams[i]);
+	}
+
+	pitch_target=Prams[0];
+	roll_target=Prams[1];
+	w_x_offset=Prams[2];
+	w_y_offset=Prams[3];
+	w_z_offset=Prams[4];	
+	
+	Error_Check(pitch_target,5);
+	Error_Check(roll_target,5);
+
+	Error_Check(a_x_offset,2);
+	Error_Check(a_y_offset,2);
+	Error_Check(a_z_offset,2);
+	
+	if(Pram_Error){
+		uprintf(USART,"load offset error!please adjust again!\r\n");
+	}
+
+}
 
 

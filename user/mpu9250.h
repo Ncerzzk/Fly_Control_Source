@@ -124,9 +124,9 @@ typedef enum{
 	GYROZ
 }GYRO;
 
-void MPU_init();
+void MPU_init(void);
 float Gyro_Normalize(s16 gyro);
-double BMP_Get_Data();
+double BMP_Get_Data(void);
 
 #endif
 

@@ -4,6 +4,7 @@
 #include "stm32f10x.h"
 #include "outputdata.h"
 
+
 void delay_init(int SYSCLK);
 void delay_us(long nus);
 float avarge(int *data,int count);
@@ -21,5 +22,6 @@ typedef struct _kal_struct{
 }Kal_Struct;
 
 float KalMan(Kal_Struct *kal,float x);
+
 
 #endif

@@ -171,9 +171,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>33</LineNumber>
+          <LineNumber>163</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134240358</Address>
+          <Address>134234522</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -182,55 +182,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>C:\Users\ncer\Desktop\缁块菠楸?user\main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\stm32\user/main.c\33</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>142</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134238126</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\ncer\Desktop\缁块菠楸?user\angle.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\stm32\user/angle.c\142</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>35</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134240362</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\ncer\Desktop\缁块菠楸?user\main.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\stm32\user/main.c\35</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>158</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134234460</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\ncer\Desktop\缁块菠楸?user\main.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\stm32\user/main.c\158</Expression>
+          <Expression>\\stm32\user/main.c\163</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -353,6 +305,31 @@
           <count>23</count>
           <WinNumber>1</WinNumber>
           <ItemText>accel_speed_Y</ItemText>
+        </Ww>
+        <Ww>
+          <count>24</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>c</ItemText>
+        </Ww>
+        <Ww>
+          <count>25</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pitch_target</ItemText>
+        </Ww>
+        <Ww>
+          <count>26</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>roll_target</ItemText>
+        </Ww>
+        <Ww>
+          <count>27</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>w_y_offset</ItemText>
+        </Ww>
+        <Ww>
+          <count>28</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>w_z_offset</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -924,6 +901,18 @@
       <bDave2>0</bDave2>
       <PathWithFileName>.\user\SR04.c</PathWithFileName>
       <FilenameWithoutPath>SR04.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>4</GroupNumber>
+      <FileNumber>42</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>.\user\ms5611.c</PathWithFileName>
+      <FilenameWithoutPath>ms5611.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

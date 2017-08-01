@@ -32,14 +32,14 @@
 #define Read(n)		GPIO_ReadInputDataBit(n)
 
 
-void SPI_GPIOInit();
+void SPI_GPIOInit(void);
 void SPI_WriteWord(u8 addr,u8 H,u8 L);
 void SPI_ReadReg(u8 addr);
-void LT8910_Init();
-u8 RX_model();
+void LT8910_Init(void);
+u8 RX_model(void);
 void SPI_WriteByte(u8 add,u8 H);
 void LT8910_Send(u8 * msg,u8 num);
-void LT8910_Get();
+void LT8910_Get(void);
 
 extern u8 RegL,RegH;
 extern u8 tx_buf[20];

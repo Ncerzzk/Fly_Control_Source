@@ -9,5 +9,4 @@ void BLE_Send_Over();
 void BLE_CMD_Open();
 void BLE_CMD_Close();
 
-
 #endif

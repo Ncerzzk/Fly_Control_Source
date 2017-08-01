@@ -76,3 +76,7 @@ float KalMan(Kal_Struct *kal,float x){
 	
 	return kal->kal_out;
 }
+
+
+
+

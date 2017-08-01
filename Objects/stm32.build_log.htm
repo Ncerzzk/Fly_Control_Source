@@ -22,19 +22,40 @@ Dialog DLL:      TCM.DLL V1.14.8.0
  
 <h2>Project:</h2>
 C:\Users\ncer\Desktop\¬Ã¿”„\stm32.uvprojx
-Project File Date:  07/24/2017
+Project File Date:  07/31/2017
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 1 (build 61)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Target 1'
-".\Objects\stm32.axf" - 0 Error(s), 0 Warning(s).
+compiling main.c...
+user\main.h(5): warning:  #1-D: last line of file ends without a newline
+  extern double angle_x;
+user\timer.h(5): warning:  #1295-D: Deprecated declaration Tim2_Init - give arg types
+  void Tim2_Init();
+user\timer.h(7): warning:  #1295-D: Deprecated declaration TIM3_Cap_Init - give arg types
+  void TIM3_Cap_Init();
+user\timer.h(8): warning:  #1-D: last line of file ends without a newline
+  #endif
+user\lt8910.h(48): warning:  #1-D: last line of file ends without a newline
+  #endif
+user\ms5611.h(12): warning:  #1-D: last line of file ends without a newline
+  #endif
+user\main.c(20): warning:  #951-D: return type of function "main" must be "int"
+  void main(){
+user\main.c(65): warning:  #223-D: function "send_wave" declared implicitly
+  				send_wave((int)(pitch*10),(int)(roll*10),(int)(ANGLE_SPEED_X_PID.i*100),(int)(Roll_PID.i*10));//Ê†?ÂÆ?Ëß?Â∫?Ê≠?Êñ?Âê?
+user\main.c: 8 warnings, 0 errors
+linking...
+Program Size: Code=28360 RO-data=1096 RW-data=576 ZI-data=4272  
+FromELF: creating hex file...
+".\Objects\stm32.axf" - 0 Error(s), 8 Warning(s).
 
 <h2>Collection of Component include folders:</h2>
   C:\Users\ncer\Desktop\¬Ã¿”„\RTE
   D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>

@@ -4,7 +4,7 @@
 #include "stm32f10x.h"
 
 #define SPI_ReadByte(SPIx) SPI_WriteByte(SPIx,0)
-void HSPI_Init();
+void HSPI_Init(void);
 
 u8 HSPI_WriteByte(SPI_TypeDef* SPIx,u8 Byte);
 void HSPI_WriteWord(SPI_TypeDef * SPIx,u8 addr,u8 H,u8 L);

@@ -12,7 +12,7 @@ float a_y_offset=0;
 float a_z_offset=0;
 float w_x_offset,w_y_offset,w_z_offset;
 
-u8 Pram_Error=0;
+
 	
 	
 s16 gyro_X,gyro_Y,gyro_Z;     //陀螺仪读出的16位有符号数
@@ -89,8 +89,7 @@ void Get_Angle_Speed(){
 */
 
 
-#define Pram_Size 6
-float Prams[Pram_Size];
+
 
 void Adjust_Gyro(){
 
@@ -117,91 +116,12 @@ void Adjust_Gyro(){
 	
 
 	
-	uprintf(USART,"adjust gyro successful!\r\n");
+	uprintf(USART,"adjust gyro successful! don't forget to write to the prams!\r\n");
 	
 	TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
 }
 
-u8 Adjust_Acc_State=0;
-#define COMPARE(MAX,B,MIN) if(B>MAX)MAX=B;else if(B<MIN)MIN=B
-float ac_x_max,ac_x_min,ac_y_max,ac_y_min,ac_z_max,ac_z_min;
-//void Adjust_Acc(){
 
-//	if(Adjust_Acc_State){
-//		COMPARE(ac_x_max,accel_speed_X,ac_x_min);
-//		COMPARE(ac_y_max,accel_speed_Y,ac_y_min);
-//		COMPARE(ac_z_max,accel_speed_Z,ac_z_min);
-//	}
-
-
-//}
-
-
-/*
-	将参数保存至扇区
-	保存三轴陀螺仪的灵漂
-*/
-
-
-void Write_Prams(){
-	int i;
-	u32 temp;
-	FLASH_Status FLASHStatus;
-	FLASH_Unlock();
-	FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_EOP|FLASH_FLAG_PGERR |FLASH_FLAG_WRPRTERR);
-	FLASHStatus = FLASH_ErasePage(FLASH_Start); //擦除一页
-
-	a_x_offset=(ac_x_max+ac_x_min)/2;
-	a_y_offset=(ac_y_max+ac_y_min)/2;
-	a_z_offset=(ac_z_max+ac_z_min)/2;	
-	
-	Prams[0]=a_x_offset;
-	Prams[1]=a_y_offset;
-	Prams[2]=w_x_offset;
-	Prams[3]=w_y_offset;
-	Prams[4]=w_z_offset;	
-	Prams[5]=a_z_offset;
-	
-	for(i=0;i<Pram_Size;++i){
-		temp=*((u32 *)(Prams+i));
-		FLASHStatus = FLASH_ProgramWord(FLASH_Start+i*4, temp);
-		uprintf(USART,"write %f\r\n",Prams[i]);
-	}
-	
-	FLASH_Lock();
-}
-
-#define Error_Check(a,max_error) if(a>max_error||a<-max_error||isnan(a))a=0;
-
-void Load_Prams(){
-	int i;
-	for(i=0;i<Pram_Size;++i){
-		Prams[i]=*(float* )(FLASH_Start+i*4);
-		uprintf(USART,"Load Pram:%f\r\n",Prams[i]);
-	}
-
-	a_x_offset=Prams[0];
-	a_y_offset=Prams[1];
-	w_x_offset=Prams[2];
-	w_y_offset=Prams[3];
-	w_z_offset=Prams[4];	
-	a_z_offset=Prams[5];
-	
-	Error_Check(w_x_offset,2);
-	Error_Check(w_y_offset,2);
-	Error_Check(w_z_offset,2);
-
-	Error_Check(a_x_offset,2);
-	Error_Check(a_y_offset,2);
-	Error_Check(a_z_offset,2);
-	
-	if(!w_x_offset||!w_y_offset||!w_z_offset){
-		uprintf(USART,"load offset error!please adjust again!\r\n");
-		
-		Pram_Error=1;
-	}
-
-}
 
 //获取偏航角度（磁力计）
 void Get_Mag_Angle(){

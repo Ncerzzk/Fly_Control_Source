@@ -43,5 +43,5 @@
 .\objects\main.o: user\angle.h
 .\objects\main.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 .\objects\main.o: user\control.h
-.\objects\main.o: user\BLE.h
+.\objects\main.o: user\ms5611.h
 .\objects\main.o: user\SR04.h

@@ -38,16 +38,16 @@ void Set_Brushless_Speed(int ch,int duty);
 	#define Set_Motor_Speed(CHN,duty)	Set_Brushless_Speed(CHN,duty)
 #endif
 
-void Brush_Init();
-float Pitch_Control();
-float Roll_Control();
-void Fly_Control();
+void Brush_Init(void);
+float Pitch_Control(void);
+float Roll_Control(void);
+void Fly_Control(void);
 
 
 #define Height_Out_Max 50
 #define Limit(value,max)    if(value>max)value=max;else if(value<-max)value=-max
 
-void Brushless_Init();
+void Brushless_Init(void);
 
 
 typedef struct{
@@ -85,4 +85,15 @@ extern float Height_Out;
 extern float Pitch_Out;
 extern float Roll_Out;
 #define clear_i(PID) PID.i=0//;PID.i_max=DUTY_MAX/10/(abs(PID.KI)==0.0?0.001:abs(PID.KI))
+
+#define Pram_Size 5
+extern float Prams[Pram_Size];
+
+#define FLASH_Start 0x08019000
+#define FLASH_Page_Size 0x400
+
+extern u8 Pram_Error;
+void Write_Prams(void);
+void Load_Prams(void);
+
 #endif

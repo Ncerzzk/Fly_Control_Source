@@ -30,19 +30,27 @@ static void ms5611_reset(void);
 static uint16_t ms5611_prom(int8_t coef_num);
 static int8_t ms5611_crc(uint16_t *prom);
 static uint32_t ms5611_read_adc(void);
-static void ms5611_start_ut(void);
-static void ms5611_get_ut(void);
-static void ms5611_start_up(void);
-static void ms5611_get_up(void);
-static void ms5611_calculate(int32_t *pressure, int32_t *temperature);
+
 
 static uint32_t ms5611_ut;  // static result of temperature measurement
 static uint32_t ms5611_up;  // static result of pressure measurement
 static uint16_t ms5611_c[PROM_NB];  // on-chip ROM
 static uint8_t ms5611_osr = CMD_ADC_4096;
 
+int32_t pressure,temperature;
+
 #define MS_Single_Write(address,data) I2C_ByteWrite(I2C_USE,MS5611_ADDR,data,address)
 
+void ms5611_init(void){
+	
+		int i;
+	
+    ms5611_reset();
+    // read all coefficients
+    for (i = 0; i < PROM_NB; i++)
+        ms5611_c[i] = ms5611_prom(i);	
+	
+}
 
 static void ms5611_reset(void)
 {
@@ -50,34 +58,77 @@ static void ms5611_reset(void)
     delay_us(2800*10);
 }
 
+static uint16_t ms5611_prom(int8_t coef_num)
+{
+    uint8_t rxbuf[2] = { 0, 0 };
+		I2C_BufferRead(I2C_USE,MS5611_ADDR,rxbuf,CMD_PROM_RD + coef_num * 2,2);
+    //i2cRead(MS5611_ADDR, CMD_PROM_RD + coef_num * 2, 2, rxbuf); // send PROM READ command
+    return rxbuf[0] << 8 | rxbuf[1];
+}
+
+static int8_t ms5611_crc(uint16_t *prom)
+{
+    int32_t i, j;
+    uint32_t res = 0;
+    uint8_t zero = 1;
+    uint8_t crc = prom[7] & 0xF;
+    prom[7] &= 0xFF00;
+
+    // if eeprom is all zeros, we're probably fucked - BUT this will return valid CRC lol
+    for (i = 0; i < 8; i++) {
+        if (prom[i] != 0)
+            zero = 0;
+    }
+    if (zero)
+        return -1;
+
+    for (i = 0; i < 16; i++) {
+        if (i & 1)
+            res ^= ((prom[i >> 1]) & 0x00FF);
+        else
+            res ^= (prom[i >> 1] >> 8);
+        for (j = 8; j > 0; j--) {
+            if (res & 0x8000)
+                res ^= 0x1800;
+            res <<= 1;
+        }
+    }
+    prom[7] |= crc;
+    if (crc == ((res >> 12) & 0xF))
+        return 0;
+
+    return -1;
+}
+
 static uint32_t ms5611_read_adc(void)
 {
     uint8_t rxbuf[3];
-		I2C_BufferRead(I2C_USE,CMD_ADC_READ,rxbuf,CMD_ADC_READ,3);
+		I2C_BufferRead(I2C_USE,MS5611_ADDR,rxbuf,CMD_ADC_READ,3);
+    //i2cRead(MS5611_ADDR, CMD_ADC_READ, 3, rxbuf); // read ADC
     return (rxbuf[0] << 16) | (rxbuf[1] << 8) | rxbuf[2];
 }
 
-static void ms5611_start_ut(void)
+void ms5611_start_ut(void)
 {
     MS_Single_Write(CMD_ADC_CONV + CMD_ADC_D2 + ms5611_osr, 1); // D2 (temperature) conversion start!
 }
 
-static void ms5611_get_ut(void)
+void ms5611_get_ut(void)
 {
     ms5611_ut = ms5611_read_adc();
 }
 
-static void ms5611_start_up(void)
+void ms5611_start_up(void)
 {
     MS_Single_Write(CMD_ADC_CONV + CMD_ADC_D1 + ms5611_osr, 1); // D1 (pressure) conversion start!
 }
 
-static void ms5611_get_up(void)
+void ms5611_get_up(void)
 {
     ms5611_up = ms5611_read_adc();
 }
 
-static void ms5611_calculate(int32_t *pressure, int32_t *temperature)
+void ms5611_calculate(void)
 {
     uint32_t press;
     int64_t temp;
@@ -101,8 +152,6 @@ static void ms5611_calculate(int32_t *pressure, int32_t *temperature)
     }
     press = ((((int64_t)ms5611_up * sens) >> 21) - off) >> 15;
 
-    if (pressure)
-        *pressure = press;
-    if (temperature)
-        *temperature = temp;
+        pressure = press;
+        temperature = temp;
 }

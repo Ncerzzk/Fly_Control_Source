@@ -9,8 +9,9 @@
 #include "set.h"
 #include "angle.h"
 #include "control.h"
+#include "ms5611.h"
 
-#include "BLE.h"
+
 #include "SR04.h"
 GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -25,6 +26,7 @@ void main(){
 
 	delay_init(72);
 	MPU_init();
+	ms5611_init();
 	TIMER_Init(TIM6);
 	if(CAP_TIM==TIM3){
 		TIM3_Cap_Init();
@@ -33,12 +35,15 @@ void main(){
 	Brushless_Init();
 	//Brush_Init();
 	Load_Prams();
+	pitch_target=-0.6;     //3.25
+	roll_target=0.4;  //48.5
+//	Write_Prams();
 	uprintf(USART,"in  it ok!\r\n");
 	
 	//uprintf(USART1,"mode=%d\r\nstate=%d\r\n",mode,state);
 	
 	//BLE_Send_Over();
-
+	
 	
 	
 	while(1){	
@@ -57,7 +62,7 @@ void main(){
 		3、根据此正方向，修改PID中参数的符号
 		*/
 			if(Send_Angle){
-				send_wave((int)(pitch*10),(int)(roll*10),(int)(ANGLE_SPEED_X_PID.last_d*100),(int)(ANGLE_SPEED_X_PID.i*100));//标定角度正方向
+				send_wave((int)(pitch*10),(int)(roll*10),(int)(ANGLE_SPEED_X_PID.i*100),(int)(Roll_PID.i*10));//标定角度正方向
 				//send_wave((int)(angle_speed_X*100),(int)(angle_speed_Y*100),(int)(angle_speed_Z*100),0);//标定角速度正方向
 				    
 				//send_wave((int)Angle_Speed_X_Out,(int)Angle_Speed_Y_Out,0,0);
@@ -68,6 +73,7 @@ void main(){
 			}
 			//uprintf(USART,"Height:%f\r\n",height);
 	}
+
 }
 
 u8 overflow;//溢出计数
@@ -118,6 +124,8 @@ void TIM3_IRQHandler(void)
     TIM_ClearITPendingBit(CAP_TIM, TIM_IT_CC1|TIM_IT_Update); //清除中断  
 }  
 int count=0;
+int save=0;
+int height_count;
 void TIM6_IRQHandler(void){
 	if (TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET){
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update);
@@ -137,11 +145,33 @@ void TIM6_IRQHandler(void){
 				//uprintf(USART,"test\r\n");
 				break;
 			case 4:
-				SR04_Trig();
-				//if(cap_count>=CAP_BUFFER_SIZE){
-				Get_Height();
-					//cap_count=0;
-				//}
+				height_count++;
+				switch(height_count){
+					case 1:
+						ms5611_start_up();
+						break;
+					case 10:
+						ms5611_get_up();
+						break;
+					case 11:
+						ms5611_start_ut();
+						break;
+					case 20:
+						ms5611_get_ut();
+						break;
+					case 21:
+						ms5611_calculate();
+						uprintf(USART,"p:%d     t:%d\r\n",pressure,temperature);
+						break;
+					case 25:
+						height_count=0;
+						break;
+					default:
+						break;
+				}
+					
+//				SR04_Trig();
+//				Get_Height();
 				break;
 			default:
 				break;
@@ -157,6 +187,16 @@ void UART4_IRQHandler(void){
 		USART_ClearITPendingBit(USART,USART_IT_RXNE); 
 		c=USART_ReceiveData(USART);
 		switch(c){
+			case '1':
+				Roll_PID.KI+=0.01;
+				clear_i(Roll_PID);
+				uprintf(USART,"Roll_PID.i=%f\r\n",Roll_PID.KI);
+				break;
+			case '2':
+				Roll_PID.KI-=0.01;
+				clear_i(Roll_PID);
+				uprintf(USART,"Roll_PID.i=%f\r\n",Roll_PID.KI);
+				break;
 			case 't':
 				Send_Angle=!Send_Angle;
 				Height_PID.i=0;
@@ -277,16 +317,9 @@ void UART4_IRQHandler(void){
 				ANGLE_SPEED_Y_PID.KP+=0.1;
 				uprintf(USART,"ANGLE_SPEED_X_PID.KP=%f\r\n",ANGLE_SPEED_X_PID.KP);
 				break;
-			case '1':
-				Roll_PID.KD+=0.01; //外环D
-				uprintf(USART,"Roll_PID.KD=%f\r\n",Roll_PID.KD);	
-				break;
-			case '2':
-				Roll_PID.KD-=0.01;    //外环D
-				uprintf(USART,"Roll_PID.KD=%f\r\n",Roll_PID.KD);	
-				break;			
+	
 			case '3':
-				Adjust_Gyro();  //取陀螺仪零偏
+				Adjust_Gyro();   //取陀螺仪零偏
 				
 				break;
 			case '4':
@@ -296,16 +329,7 @@ void UART4_IRQHandler(void){
 				Write_Prams();  //写参数 
 				break;
 			
-			case '6':
-				Adjust_Acc_State=!Adjust_Acc_State;
-				if(Adjust_Acc_State){
-					uprintf(USART,"adjust acc start!\r\n");
-				}
-				else{
-					uprintf(USART,"adjust acc successful!\r\n");
-					uprintf(USART,"A_X0:%f\r\nA_Y0:%f\r\nA_Z0:%f\r\n",a_x_offset,a_y_offset,a_z_offset);
-				}
-				break;
+
 			case '7':
 				roll_target=10;
 				uprintf(USART,"roll_target =10!!\r\n");
@@ -323,9 +347,49 @@ void UART4_IRQHandler(void){
 				uprintf(USART,"roll_out =5!!\r\n");
 				break;
 			case 'w':
-				base_duty=30;
-				uprintf(USART,"base duty =30!!\r\n");
+				base_duty=35;
+				uprintf(USART,"base duty =35!!\r\n");
 				break;
+			
+			case 'A':  //手柄左边 上
+				pitch_target-=0.05;
+				break;
+			case 'B':    //下
+				pitch_target+=0.05;
+				break;
+			case 'C':   //左
+				roll_target+=0.05;
+				break;
+			case 'D':		//右
+				roll_target-=0.05;
+				break;		
+			
+			case 'I':
+				base_duty+=1;
+				break;
+			
+			case 'J':
+				base_duty-=1;
+				break;
+			case 'K':
+				base_duty=35;
+				break;
+			case 'L':
+				Fly=0;
+				break;
+			case 'G':   //select
+				Fly=1;
+				break;
+			case 'E':    //左边的1
+				save=1;
+				break;
+			case 'N':		//右边的2
+				if(save){
+					Write_Prams(); 
+					save=0;
+				}
+				break;
+			
 			default:
 				break;
 		}
