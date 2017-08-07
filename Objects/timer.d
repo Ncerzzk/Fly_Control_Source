@@ -30,3 +30,5 @@
 .\objects\timer.o: .\Lib\inc\stm32f10x_wwdg.h
 .\objects\timer.o: .\Lib\inc\misc.h
 .\objects\timer.o: user\set.h
+.\objects\timer.o: user\base.h
+.\objects\timer.o: user\outputdata.h

@@ -2,10 +2,12 @@
 #include "base.h"
 
 float height;
+float SR04_V;
 
-Kal_Struct kal_height={1,0,0.01,37.1160,0,1};
+Kal_Struct kal_height={1,0,1,20,0,1};
+Kal_Struct kal_V={1,0,0.5,100,0,1};
 
-int cap_time;
+float cap_time;
 int cap_time_data[CAP_BUFFER_SIZE];
 int cap_count;
 void SR04_Init(){
@@ -26,18 +28,23 @@ void SR04_Init(){
 
 void SR04_Trig(){
 	GPIO_SetBits(GPIOA,GPIO_Pin_4);
-	delay_us(15);
+	delay_us(70);
 	GPIO_ResetBits(GPIOA,GPIO_Pin_4);
 }
 
 
+/*
+本函数已经废弃，迁移至main.c中的TIM3中断中。
+*/
 void Get_Height(){
 	//height=avarge(cap_time_data,CAP_BUFFER_SIZE)*0.5*34000/1000000/2;   //单位为cm;
 	float temp;
 	temp=cap_time*0.5*34000/1000000/2; 
-	if(temp<300){
-		height=temp;
-	}
-	height=KalMan(&kal_height,height);
+	height=temp;
+//	if(temp<300){
+//		height=temp;
+//	}
+	//height=KalMan(&kal_height,height);
 	
 }
+

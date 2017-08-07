@@ -3,11 +3,14 @@
 #include "angle.h"
 #include "SR04.h"
 
+
+#define HEIGHT_CONSTANT  70
+#define UP_DUTY			35
 //期望的俯仰、横滚、偏航角
-float pitch_target=-0.6;     //3.25
-float roll_target=0.4;  //48.5
-float yaw_target=0;
-float height_target=80;   //单位cm
+float pitch_target=-3.5;     //3.25
+float roll_target=0.3;  //48.5
+float yaw_target=0.9;
+float height_target=HEIGHT_CONSTANT;   //单位cm
 float Angle_Speed_X_Out=0;
 float Angle_Speed_Y_Out=0;
 float Angle_Speed_Z_Out=0;
@@ -15,7 +18,10 @@ float Accel_Speed_Z_Out=0; //加速度环 高度环的内环
 float Height_Out=0;
 float Pitch_Out=0;
 float Roll_Out=0;
+float Velocity_Out=0;
 char Fly=0;
+
+float height_offset; 		//高度初始值
 
 float base_duty=20; //50
 float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
@@ -29,11 +35,17 @@ PID_S Roll_PID_Single={-2,0,0,0,0,1000};
 
 PID_S Roll_PID={0.25,0,0.1,0,0,2};
 PID_S Pitch_PID={-0.25,0,-0.1,0,0,2};
-PID_S ACCEL_SPEED_Z_PID={0};
+PID_S ACCEL_SPEED_Z_PID={7,0,0,0,0,2};
 PID_S ANGLE_SPEED_Y_PID={-5,-60,-1,0,0,5};
 PID_S ANGLE_SPEED_X_PID={-5,-60,-1,0,0,5};
 PID_S ANGLE_SPEED_Z_PID={10,0,0,0,0,1000};
-PID_S Height_PID={0.5,0,0.0055,0,0,9000};  //0.0055
+PID_S Height_PID={0.8,0,0,0,0,9000};  //0.0055
+
+PID_S Velocity_PID={0.26,5,0.1,0,0,1000};
+
+Fly_State  State=STOP;
+
+Kal_Struct kal_acc_z={1,0,0.00001,0.0012,0,1};
 
 float Limit_Duty(float duty){
 	float max_duty=DUTY_MAX;
@@ -48,7 +60,36 @@ float Limit_Duty(float duty){
 	return duty;
 }
 
+void Fly_Init(void){      //解锁飞行，初始化高度、yaw
+	State=FLY_WAIT;
+	base_duty=28;           //FLY_WAIT状态，占空比可以手动更改
+}
 
+void Fly_Up(void){		//起飞
+	State=FLY;
+	//base_duty=UP_DUTY;
+	
+}
+void Fly_Stop(void){
+	State=STOP;
+}
+
+void Fly_Land(void){
+	State=LAND;
+}
+
+void Fly_Land_Process(void){		//降落过程
+	if(State!=LAND)
+		return ;
+	
+	if(height_target>13){
+		height_target-=0.2;   //5ms减0.2cm  0.2*200=40cm    1s降低40cm
+	}else{
+		height_target=13; 
+		base_duty=20;
+	}
+	
+}
 
 void Set_Brushless_Speed(int ch,int duty){
 	if(ch>4||ch<1)
@@ -192,26 +233,28 @@ int height_cnt;  //高度环计算计数
 #define Heignt_CNT_MAX 100
 float Height_Out_Dt;
 
+float Height_Control(){
+	
+}
+
 void Fly_Control(){
 
 	float height_out_temp;
 	float height_out_sub;
 	
-	if(!Fly||Pram_Error){
+
+	if((State==STOP)||Pram_Error){
 		Brushless_Stop();
 		return ;
 	}
-	 
+	
+	Fly_Land_Process();
+	
 	/*
 	if(height_cnt>=Heignt_CNT_MAX){	
 		height_out_temp=PID_Control(&Height_PID,height_target,height);
 		
-		//高度环限幅
-		if(height_out_temp>Height_Out_Max){
-			height_out_temp=Height_Out_Max;
-		}else if(height_out_temp<-Height_Out_Max){
-			height_out_temp=-Height_Out_Max;
-		}
+		
 		
 		height_out_sub=height_out_temp-Height_Out;       //本次高度环与上次高度环输出做差，得到高度环改变量
 	
@@ -225,13 +268,29 @@ void Fly_Control(){
 	Height_Out+=Height_Out_Dt;
 	*/
 	
-
-
-
+	
 //	Height_Out=PID_Control(&Height_PID,height_target,height);
-//	Limit(Height_Out,Height_Out_Max);
-//	
-//	Accel_Speed_Z_Out=PID_Control(&ACCEL_SPEED_Z_PID,Height_Out,accel_speed_Z);
+//	Limit(Height_Out,30);
+	
+	
+
+	if(State==FLY_WAIT){       //即FLY_State状态
+		;
+		
+	}else if(State==FLY){
+		
+		Height_Out=PID_Control(&Height_PID,height_target,height);
+		Limit(Height_Out,40);
+		
+		Velocity_Out=PID_Control(&Velocity_PID,Height_Out,SR04_V);   //测试速度环用，正式时要删除
+		Limit(Velocity_Out,30); 
+
+		//base_duty=Height_Out+30;
+		
+	}
+		
+
+	
 	
 	Roll_Out=PID_Control(&Roll_PID,roll_target,roll);
 	Limit(Roll_Out,10);
@@ -250,10 +309,10 @@ void Fly_Control(){
 
 
 	//串级PID
-	CH1_Out=-Angle_Speed_X_Out+Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty+Height_Out;  //以角度向前倾，向左倾为标准
-	CH2_Out=-Angle_Speed_X_Out-Angle_Speed_Y_Out-Angle_Speed_Z_Out+base_duty+Height_Out;
-	CH3_Out=Angle_Speed_X_Out-Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty+Height_Out;
-	CH4_Out=Angle_Speed_X_Out+Angle_Speed_Y_Out-Angle_Speed_Z_Out+base_duty+Height_Out;
+	CH1_Out=-Angle_Speed_X_Out+Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty+Velocity_Out;  //以角度向前倾，向左倾为标准
+	CH2_Out=-Angle_Speed_X_Out-Angle_Speed_Y_Out-Angle_Speed_Z_Out+base_duty+Velocity_Out;
+	CH3_Out=Angle_Speed_X_Out-Angle_Speed_Y_Out+Angle_Speed_Z_Out+base_duty+Velocity_Out;
+	CH4_Out=Angle_Speed_X_Out+Angle_Speed_Y_Out-Angle_Speed_Z_Out+base_duty+Velocity_Out;
 	
 	Set_Motor_Speed(1,CH1_Out);
 	Set_Motor_Speed(2,CH2_Out);

@@ -32,3 +32,8 @@
 .\objects\ms5611.o: user\outputdata.h
 .\objects\ms5611.o: user\ms5611.h
 .\objects\ms5611.o: user\i2c.h
+.\objects\ms5611.o: user\set.h
+.\objects\ms5611.o: user\USART.h
+.\objects\ms5611.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\ms5611.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
+.\objects\ms5611.o: user\SR04.h

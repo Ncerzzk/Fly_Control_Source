@@ -29,14 +29,14 @@
 .\objects\control.o: .\Lib\inc\stm32f10x_usart.h
 .\objects\control.o: .\Lib\inc\stm32f10x_wwdg.h
 .\objects\control.o: .\Lib\inc\misc.h
+.\objects\control.o: user\base.h
+.\objects\control.o: user\outputdata.h
 .\objects\control.o: user\set.h
 .\objects\control.o: user\angle.h
 .\objects\control.o: user\angle.h
 .\objects\control.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 .\objects\control.o: user\mpu9250.h
 .\objects\control.o: user\i2c.h
-.\objects\control.o: user\base.h
-.\objects\control.o: user\outputdata.h
 .\objects\control.o: user\USART.h
 .\objects\control.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\control.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h

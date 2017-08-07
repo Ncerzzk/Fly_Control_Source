@@ -1,6 +1,7 @@
 #ifndef __CONTROL_H
 #define __CONTROL_H
 #include "stm32f10x.h"
+#include "base.h"
 
 #define BRUSHLESS
 
@@ -44,7 +45,7 @@ float Roll_Control(void);
 void Fly_Control(void);
 
 
-#define Height_Out_Max 50
+
 #define Limit(value,max)    if(value>max)value=max;else if(value<-max)value=-max
 
 void Brushless_Init(void);
@@ -60,7 +61,6 @@ typedef struct{
 	float last_d;
 }PID_S;
 
-void clear_i(PID_S * temp);
 
 extern char Fly;
 extern PID_S Pitch_PID_Single;
@@ -96,4 +96,22 @@ extern u8 Pram_Error;
 void Write_Prams(void);
 void Load_Prams(void);
 
+typedef enum{
+	FLY_WAIT=0,
+	FLY=1,
+	LAND=2,
+	STOP=3,
+}Fly_State;
+
+extern Fly_State  State;
+
+void Fly_Init(void);
+void Fly_Stop(void);
+void Fly_Land(void);
+void Fly_Up(void);
+
+extern float height_target,height_offset;
+extern float Accel_Speed_Z_Out;
+extern Kal_Struct kal_acc_z;
+extern PID_S Velocity_PID;
 #endif

@@ -38,3 +38,4 @@
 .\objects\angle.o: user\USART.h
 .\objects\angle.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\angle.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
+.\objects\angle.o: user\set.h

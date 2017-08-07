@@ -89,8 +89,9 @@ void TIM3_Cap_Init()
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);    //使能TIM5时钟  
       
     //TIM3的配置  
-    TIM_TimeBaseStructure.TIM_Period = 2000;     //重装载值  
-    TIM_TimeBaseStructure.TIM_Prescaler =35;   //分频系数   //36分频，分完频率为2M HZ   0.5us
+   // TIM_TimeBaseStructure.TIM_Period = 2000;     //重装载值  
+		TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
+    TIM_TimeBaseStructure.TIM_Prescaler =71;   //分频系数   //72分频，分完频率为1M HZ   
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;      
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //向上计数  
     TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);   

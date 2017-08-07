@@ -1,4 +1,5 @@
 #include "angle.h"
+#include "set.h"
 
 #define INTEGRAL_CONSTANT 0.005		//积分时间 5ms
 #define HALF_T 0.0025
@@ -46,7 +47,7 @@ void BMP_Get_Height(){
 	if(!BMP_OPEN)
 		return ;
 	BMP_height=(float)BMP_Get_Data();
-	BMP_height=BMP_HEIGHT_CONSTANT-BMP_height;
+	BMP_height=HEIGHT_CONSTANT-BMP_height;
 	BMP_height*=8;
 	BMP_height/=100;
 }
@@ -235,4 +236,94 @@ void IMU_Update(float ax,float ay,float az,float wx,float wy,float wz){
 		}
 }
 
-
+void AHR_Update(float ax,float ay,float az,float wx,float wy,float wz,float mx,float my,float mz){
+	float norm;
+	float gbx,gby,gbz;
+  float q0q0 = q0 * q0;                                                        
+  float q0q1 = q0 * q1;
+  float q0q2 = q0 * q2;
+  float q1q1 = q1 * q1;
+  float q1q3 = q1 * q3;
+  float q2q2 = q2 * q2;
+  float q2q3 = q2 * q3;
+  float q3q3 = q3 * q3;
+	float q1q2=q1*q2;
+	float q0q3=q0*q3;
+	float ex,ey,ez;
+	float exInt,eyInt,ezInt;
+	float hx,hy,hz,bx,bz;
+	float mbx,mby,mbz;
+	norm=sqrt(ax*ax+ay*ay+az*az);
+	if(norm<Semig)
+		return ;
+	ax/=norm;
+	ay/=norm;
+	az/=norm; 
+	
+	norm=sqrt(mx*mx+my*my+mz*mz);
+	if(norm<Semig)
+		return ;
+	mx/=norm;
+	my/=norm;
+	mz/=norm;
+	
+	//计算磁通参考方向？？
+	hx = 2*mx*(0.5 - q2q2 - q3q3) + 2*my*(q1q2 - q0q3) + 2*mz*(q1q3 + q0q2); 
+	hy = 2*mx*(q1q2 + q0q3) + 2*my*(0.5 - q1q1 - q3q3) + 2*mz*(q2q3 - q0q1); 
+	hz = 2*mx*(q1q3 - q0q2) + 2*my*(q2q3 + q0q1) + 2*mz*(0.5 - q1q1 - q2q2);          
+	bx = sqrt((hx*hx) + (hy*hy)); 
+	bz = hz;
+	
+	//计算重力加速度旋转到机体坐标系后的值,即以当前估计的姿态作为旋转矩阵
+	gbx= 2*(q1q3 - q0q2);
+	gby= 2*(q0q1 + q2q3);
+	gbz= q0q0 - q1q1 - q2q2 + q3q3;
+	
+	//计算磁场旋转到机体坐标系的值
+	mbx = 2*bx*(0.5 - q2q2 - q3q3) + 2*bz*(q1q3 - q0q2); 
+	mby = 2*bx*(q1q2 - q0q3) + 2*bz*(q0q1 + q2q3); 
+	mbz = 2*bx*(q0q2 + q1q3) + 2*bz*(0.5 - q1q1 - q2q2);   
+	
+	//与实际加速度计测得的ax,ay,az做叉积，取误差
+	//为什么（单位向量）叉积可以作为误差，因为A x B =|A|*|B|*sinSeita=sinSeita, sinSeita约等于Seita
+	ex = (ay*gbz - az*gby)+(my*mbz - mz*mby);                                                            
+	ey = (az*gbx - ax*gbz)+(mz*mbx - mx*mbz);
+	ez = (ax*gby - ay*gbx)+(mx*mby - my*mbx);
+	
+	
+		exInt += ex*IMU_I*INTEGRAL_CONSTANT;
+		eyInt += ey*IMU_I*INTEGRAL_CONSTANT;
+		ezInt += ez*IMU_I*INTEGRAL_CONSTANT;
+		
+		//补偿误差
+		wx+=ex*IMU_P+exInt;
+		wy+=ey*IMU_P+eyInt;
+		wz+=ez*IMU_P+ezInt;
+	
+		//更新四元数
+		q0=  q0 + (-q1*wx - q2*wy - q3*wz)*HALF_T;
+		q1 = q1 + (q0*wx + q2*wz - q3*wy)*HALF_T;
+		q2 = q2 + (q0*wy - q1*wz + q3*wx)*HALF_T;
+		q3 = q3 + (q0*wz + q1*wy - q2*wx)*HALF_T; 
+	
+		//计算欧拉角
+		norm=sqrt(q0*q0+q1*q1+q2*q2+q3*q3);
+		if(norm<Semig)
+			return ;
+		q0/=norm;
+		q1/=norm;
+		q2/=norm;
+		q3/=norm;
+		
+		pitch= asin(-2*q1*q3 + 2*q0*q2)* 57.3;
+		roll= atan2(2*q2*q3 + 2*q0*q1, -2*q1*q1 - 2*q2*q2+1)* 57.3; 
+		yaw=atan2(2*q1q2 + 2*q0q3, -2*q2q2 - 2*q3q3+1)* 57.3; 
+		
+		if(GY521){
+			if(roll>0){
+				roll-=180;
+			}else{
+				roll+=180;
+			}
+		}
+}

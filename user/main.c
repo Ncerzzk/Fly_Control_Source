@@ -10,14 +10,20 @@
 #include "angle.h"
 #include "control.h"
 #include "ms5611.h"
+#include "hmc5883.h"
 
 
 #include "SR04.h"
 GPIO_InitTypeDef GPIO_InitStructure;
-
+u8 TIM3CH1_CAPTURE_STA=0; //输入捕获状态
+//bit7:捕获完成标志 
+//bit6：捕获到高点平标志
+//bit5~0：捕获到高电平后定时器溢出的次数
+u32 TIM3CH1_CAPTURE_VAL;//输入捕获值
 
 
 void main(){
+	int temp;
 	
 	SystemInit();
 	Usart_Init(USART,115200);
@@ -26,7 +32,10 @@ void main(){
 
 	delay_init(72);
 	MPU_init();
-	ms5611_init();
+	//ms5611_init();
+	
+	//hmc5883lInit();
+	
 	TIMER_Init(TIM6);
 	if(CAP_TIM==TIM3){
 		TIM3_Cap_Init();
@@ -35,9 +44,9 @@ void main(){
 	Brushless_Init();
 	//Brush_Init();
 	Load_Prams();
-	pitch_target=-0.6;     //3.25
-	roll_target=0.4;  //48.5
-//	Write_Prams();
+	pitch_target=-2.85;     //3.25
+	roll_target=0.3;  //48.5
+	Write_Prams();
 	uprintf(USART,"in  it ok!\r\n");
 	
 	//uprintf(USART1,"mode=%d\r\nstate=%d\r\n",mode,state);
@@ -61,8 +70,18 @@ void main(){
 		2、标定角速度正方向  X左倾为正   Y前倾为正 Z 顺时针为正
 		3、根据此正方向，修改PID中参数的符号
 		*/
+		
+//				if(TIM3CH1_CAPTURE_STA&0X80)//成功捕获到了一次高电平
+//		{
+//			temp=TIM3CH1_CAPTURE_STA&0X3F;
+//			temp*=65535;					//溢出时间总和
+//			temp+=TIM3CH1_CAPTURE_VAL;		//得到总的高电平时间
+//			uprintf(USART,"HIGH:%f cm\r\n",((float)temp)*0.5*34000/1000000/2);	//打印总的高点平时间
+// 			TIM3CH1_CAPTURE_STA=0;			//开启下一次捕获
+// 		}
+		
 			if(Send_Angle){
-				send_wave((int)(pitch*10),(int)(roll*10),(int)(ANGLE_SPEED_X_PID.i*100),(int)(Roll_PID.i*10));//标定角度正方向
+				//send_wave((int)(pitch*10),(int)(roll*10),(int)(accel_speed_Z*10),(int)(Roll_PID.i*10));//标定角度正方向
 				//send_wave((int)(angle_speed_X*100),(int)(angle_speed_Y*100),(int)(angle_speed_Z*100),0);//标定角速度正方向
 				    
 				//send_wave((int)Angle_Speed_X_Out,(int)Angle_Speed_Y_Out,0,0);
@@ -70,13 +89,14 @@ void main(){
 				//send_wave((int)CH1_Out,(int)CH2_Out,(int)CH3_Out,(int)CH4_Out);
 				//send_wave((int)Angle_Speed_Y_Out,(int)Angle_Speed_X_Out,(int)pitch,(int)roll);
 				//send_wave((int)Angle_Speed_X_Out,(int)(ANGLE_SPEED_X_PID.i*100),(int)(angle_speed_X*10),(int)roll);
+				send_wave((int)(height),(int)(kal_acc_z.kal_out),(int)(Height_PID.i),(int)(SR04_V));
 			}
 			//uprintf(USART,"Height:%f\r\n",height);
 	}
 
 }
 
-u8 overflow;//溢出计数
+int overflow;//溢出计数
 
 typedef enum{
 	WAIT_RISING,
@@ -86,10 +106,55 @@ typedef enum{
 cap_state state=WAIT_RISING;
 
 
+/*
+void TIM3_IRQHandler(void)
+{ 
+
+ 	if((TIM3CH1_CAPTURE_STA&0X80)==0)//还未成功捕获	 与第七位与
+	{	  
+		if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)   //溢出标志
+		 
+		{	    
+			if(TIM3CH1_CAPTURE_STA&0X40)//已经捕获到高电平了
+			{
+				if((TIM3CH1_CAPTURE_STA&0X3F)==0X3F)//高电平太长了
+				{
+					TIM3CH1_CAPTURE_STA|=0X80;//标记成功捕获了一次
+					TIM3CH1_CAPTURE_VAL=0XFFFF;
+				}else TIM3CH1_CAPTURE_STA++;
+			}	 
+		}
+		if (TIM_GetITStatus(TIM3, TIM_IT_CC1) != RESET)//捕获1发生捕获事件
+			{	
+				if(TIM3CH1_CAPTURE_STA&0X40)		//捕获到一个下降沿 		
+				{	  			
+					TIM3CH1_CAPTURE_STA|=0X80;		//标记成功捕获到一次上升沿
+					TIM3CH1_CAPTURE_VAL=TIM_GetCapture1(TIM3);
+					TIM_OC1PolarityConfig(TIM3,TIM_ICPolarity_Rising); //CC1P=0 设置为上升沿捕获
+				}else  								//还未开始,第一次捕获上升沿
+				{
+					TIM3CH1_CAPTURE_STA=0;			//清空
+					TIM3CH1_CAPTURE_VAL=0;
+					TIM_SetCounter(TIM3,0);
+					TIM3CH1_CAPTURE_STA|=0X40;		//标记捕获到了上升沿
+					TIM_OC1PolarityConfig(TIM3,TIM_ICPolarity_Falling);		//CC1P=1 设置为下降沿捕获
+				}		    
+			}			     	    					   
+ 	}
+ 
+    TIM_ClearITPendingBit(TIM3, TIM_IT_CC1|TIM_IT_Update); //清除中断标志位
+ 
+}*/
+
+
+
 void TIM3_IRQHandler(void)  
 {   
+		float height_temp;
+		float v_temp;
 		if (TIM_GetITStatus(CAP_TIM, TIM_IT_Update) != RESET)  {         
 				++overflow;  
+				TIM_ClearITPendingBit(CAP_TIM, TIM_IT_Update); //清除中断  
 		}  
 			
 		if (TIM_GetITStatus(CAP_TIM, TIM_IT_CC1) != RESET)//捕获事件  
@@ -104,28 +169,42 @@ void TIM3_IRQHandler(void)
 				else if(state==WAIT_FALLING)// wait falling  
 				{  
 						cap_time = TIM_GetCapture1(CAP_TIM);  
-						cap_time+= overflow*2000;  
+						cap_time+= overflow*65535;  
 						
-					/*
-						if(cap_count<CAP_BUFFER_SIZE){
-							cap_time_data[cap_count]=cap_time;
-							cap_count++;
-						}
-					*/
+						height_temp=cap_time*0.5*34000/1000000;
+						height_temp=KalMan(&kal_height,height_temp);
 					
+						if(height_temp>300)
+							height_temp=height;
+						v_temp=(height_temp-height)/0.015;    //单位 cm/s
+						
+						
+						v_temp=KalMan(&kal_V,v_temp);
+						if(v_temp>50||v_temp<-50){
+							;
+						}else{
+							SR04_V=v_temp;
+						}
+
+						Limit(SR04_V,50);
+						height=height_temp;
 						overflow = 0;  
 						TIM_SetCounter(CAP_TIM,0);  
 						state = WAIT_RISING;  
 						TIM_OC1PolarityConfig(CAP_TIM,TIM_ICPolarity_Rising); //设置为上升沿捕获  
 							
 				}  
+				TIM_ClearITPendingBit(CAP_TIM, TIM_IT_CC1); //清除中断  
 		}                                                  
    
-    TIM_ClearITPendingBit(CAP_TIM, TIM_IT_CC1|TIM_IT_Update); //清除中断  
+    //TIM_ClearITPendingBit(CAP_TIM, TIM_IT_CC1|TIM_IT_Update); //清除中断  
 }  
+
 int count=0;
 int save=0;
-int height_count;
+
+int temp;
+
 void TIM6_IRQHandler(void){
 	if (TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET){
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update);
@@ -137,6 +216,7 @@ void TIM6_IRQHandler(void){
 				break;
 			case 2:
 				IMU_Update(accel_speed_X,accel_speed_Y,accel_speed_Z,angle_speed_X,angle_speed_Y,angle_speed_Z);
+				//AHR_Update(accel_speed_X,accel_speed_Y,accel_speed_Z,angle_speed_X,angle_speed_Y,angle_speed_Z,Mag_X,Mag_Y,Mag_Z);
 				//Get_Angle();
 				break;
 			case 3:
@@ -145,33 +225,18 @@ void TIM6_IRQHandler(void){
 				//uprintf(USART,"test\r\n");
 				break;
 			case 4:
-				height_count++;
-				switch(height_count){
-					case 1:
-						ms5611_start_up();
-						break;
-					case 10:
-						ms5611_get_up();
-						break;
-					case 11:
-						ms5611_start_ut();
-						break;
-					case 20:
-						ms5611_get_ut();
-						break;
-					case 21:
-						ms5611_calculate();
-						uprintf(USART,"p:%d     t:%d\r\n",pressure,temperature);
-						break;
-					case 25:
-						height_count=0;
-						break;
-					default:
-						break;
+				//ms5611_get_height();
+			temp++;
+				if(temp>=3){
+					SR04_Trig();
+					//Get_Height();
+					temp=0;
 				}
-					
-//				SR04_Trig();
-//				Get_Height();
+				break;
+			case 0:
+				//HMC_Get_Mag();    //20ms 一次
+				
+				
 				break;
 			default:
 				break;
@@ -207,12 +272,16 @@ void UART4_IRQHandler(void){
 				uprintf(USART,"Debug=  %d\r\n",Debug);
 				break;
 			case 'f':
-				Fly=1;
+				Fly_Init();
 				uprintf(USART,"start fly!\r\n");
 				break;
 			case 's':
-				Fly=0;
+				Fly_Stop();
 				uprintf(USART,"stop fly!\r\n");
+				break;
+			case 'w':
+				Fly_Up();
+				uprintf(USART,"fly up !!\r\n");
 				break;
 			case 'p':
 				Roll_PID.KP+=0.01;
@@ -282,30 +351,35 @@ void UART4_IRQHandler(void){
 				uprintf(USART,"yaw_KP=%f\r\n",ANGLE_SPEED_Z_PID.KP);
 				break;				
 			case 'n':
-				Height_PID.KI+=0.001;
-				Height_PID.i_max=Height_Out_Max/Height_PID.KI;
-				uprintf(USART,"height_KI=%f     Height_PID.i_max=%f\r\n",Height_PID.KI,Height_PID.i_max);
+				Velocity_PID.KI+=0.001;
+				clear_i(Velocity_PID);
+				uprintf(USART,"Velocity_PID.KI=%f\r\n",Velocity_PID.KI);
 				break;
 			case 'm':
-				Height_PID.KI-=0.001;
-				Height_PID.i_max=Height_Out_Max/Height_PID.KI;
-				uprintf(USART,"height_KI=%f     Height_PID.i_max=%f\r\n",Height_PID.KI,Height_PID.i_max);
+				Velocity_PID.KI-=0.001;
+				clear_i(Velocity_PID);
+				uprintf(USART,"Velocity_PID.KI=%f\r\n",Velocity_PID.KI);
 				break;
+
 			case 'k':
-				Height_PID.KP+=0.1;
-				uprintf(USART,"Height_PID.KP=%f\r\n",Height_PID.KP);
+				Velocity_PID.KP+=0.01;
+				uprintf(USART,"V_PID.KP=%f\r\n",Velocity_PID.KP);
+//				Height_PID.KP+=0.1;
+//				uprintf(USART,"Height_PID.KP=%f\r\n",Height_PID.KP);
 				break;
 			case 'l':
-				Height_PID.KP-=0.1;
-				uprintf(USART,"Height_PID.KP=%f\r\n",Height_PID.KP);
+				Velocity_PID.KP-=0.01;
+				uprintf(USART,"V_PID.KP=%f\r\n",Velocity_PID.KP);
+//				Height_PID.KP-=0.1;
+//				uprintf(USART,"Height_PID.KP=%f\r\n",Height_PID.KP);
 				break;		
 			case 'g':
-				Height_PID.KD+=0.1;
-				uprintf(USART,"Height_PID.KD=%f\r\n",Height_PID.KD);
+				Velocity_PID.KD+=0.1;
+				uprintf(USART,"Velocity_PID.KD=%f\r\n",Velocity_PID.KD);
 				break;	
 			case 'h':
-				Height_PID.KD-=0.1;
-				uprintf(USART,"Height_PID.KD=%f\r\n",Height_PID.KD);
+				Velocity_PID.KD-=0.1;
+				uprintf(USART,"Velocity_PID.KD=%f\r\n",Velocity_PID.KD);
 				break;	
 			case 'y':
 				ANGLE_SPEED_X_PID.KP-=0.1;	//内环P
@@ -331,12 +405,13 @@ void UART4_IRQHandler(void){
 			
 
 			case '7':
-				roll_target=10;
-				uprintf(USART,"roll_target =10!!\r\n");
+				Height_Out=15;
+				//roll_target=10;
+				uprintf(USART,"height_out =15!!\r\n");
 				break;
 			case '8':
-				roll_target=0;
-				uprintf(USART,"roll_target =0!!\r\n");
+				Height_Out=0;
+				uprintf(USART,"Height_Out =0!!\r\n");
 				break;
 			case '9':
 				Roll_Out=0;
@@ -346,22 +421,23 @@ void UART4_IRQHandler(void){
 				Roll_Out=5;
 				uprintf(USART,"roll_out =5!!\r\n");
 				break;
-			case 'w':
-				base_duty=35;
-				uprintf(USART,"base duty =35!!\r\n");
-				break;
+
 			
 			case 'A':  //手柄左边 上
 				pitch_target-=0.05;
+				uprintf(USART,"%f\r\n",pitch_target);
 				break;
 			case 'B':    //下
 				pitch_target+=0.05;
+			uprintf(USART,"%f\r\n",pitch_target);
 				break;
 			case 'C':   //左
 				roll_target+=0.05;
+				uprintf(USART,"%f\r\n",roll_target);
 				break;
 			case 'D':		//右
 				roll_target-=0.05;
+			uprintf(USART,"%f\r\n",roll_target);
 				break;		
 			
 			case 'I':
@@ -390,8 +466,16 @@ void UART4_IRQHandler(void){
 				}
 				break;
 			
+			case 'P':
+				Height_PID.KP+=0.1;
+				uprintf(USART,"height_PID.KP=%f\r\n",Height_PID.KP);
+				break;
+			case 'Q':
+				Height_PID.KP-=0.1;
+				uprintf(USART,"height_PID.KP=%f\r\n",Height_PID.KP);
+				break;
 			default:
 				break;
-		}
+		} 
 	}
 }

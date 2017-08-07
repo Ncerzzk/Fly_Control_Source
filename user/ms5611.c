@@ -5,6 +5,9 @@
 #include "base.h"
 #include "ms5611.h"
 #include "i2c.h"
+#include "set.h"
+#include "USART.h"
+#include "SR04.h"
 
 
 // MS5611, Standard address 0x77
@@ -50,6 +53,41 @@ void ms5611_init(void){
     for (i = 0; i < PROM_NB; i++)
         ms5611_c[i] = ms5611_prom(i);	
 	
+}
+
+int ms5611_cnt;
+void ms5611_get_height(void){
+	float temp;
+	ms5611_cnt++;
+
+	switch(ms5611_cnt){
+		case 1:
+			ms5611_start_up();
+			break;
+		case 10:
+			ms5611_get_up();
+			break;
+		case 11:
+			ms5611_start_ut();
+			break;
+		case 20:
+			ms5611_get_ut();
+			break;
+		case 21:
+			ms5611_calculate();
+			temp=HEIGHT_CONSTANT-pressure;
+			temp/=8;
+			temp/=100;
+			height=temp;
+			uprintf(USART,"%f\r\n",height);
+			//uprintf(USART,"p:%d     t:%d     height:%f\r\n",pressure,temperature,temp);
+			break;
+		case 25:
+			ms5611_cnt=0;
+			break;
+		default:
+			break;
+	}
 }
 
 static void ms5611_reset(void)

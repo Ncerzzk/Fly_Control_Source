@@ -96,9 +96,6 @@
 #define BMP280_TEMPERATURE_LSB_REG           0xFB  /*Temperature LSB Reg */  
 #define BMP280_TEMPERATURE_XLSB_REG          0xFC  /*Temperature XLSB Reg */  
 
-#define BMP_HEIGHT_CONSTANT				101325
-
-
 
 #define MPU_Single_Read(address)   I2C_ByteRead(I2C_USE,MPU_Address,address)
 #define MAG_Single_Read(address)   I2C_ByteRead(I2C_USE,MAG_Address,address)
