@@ -35,6 +35,8 @@ float q1=0;
 float q2=0;
 float q3=0;
 
+float exInt,eyInt,ezInt;
+
 float IMU_P=2;
 float IMU_I=0.005;
 double pitch,roll,yaw;
@@ -178,7 +180,7 @@ void IMU_Update(float ax,float ay,float az,float wx,float wy,float wz){
 	float q1q2=q1*q2;
 	float q0q3=q0*q3;
 	float ex,ey,ez;
-	float exInt,eyInt,ezInt;
+//	float exInt,eyInt,ezInt;     在这里定义有问题
 	norm=sqrt(ax*ax+ay*ay+az*az);
 	if(norm<Semig)
 		return ;
@@ -250,7 +252,7 @@ void AHR_Update(float ax,float ay,float az,float wx,float wy,float wz,float mx,f
 	float q1q2=q1*q2;
 	float q0q3=q0*q3;
 	float ex,ey,ez;
-	float exInt,eyInt,ezInt;
+//	float exInt,eyInt,ezInt;
 	float hx,hy,hz,bx,bz;
 	float mbx,mby,mbz;
 	norm=sqrt(ax*ax+ay*ay+az*az);

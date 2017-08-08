@@ -29,3 +29,8 @@
 .\objects\spi.o: .\Lib\inc\stm32f10x_usart.h
 .\objects\spi.o: .\Lib\inc\stm32f10x_wwdg.h
 .\objects\spi.o: .\Lib\inc\misc.h
+.\objects\spi.o: user\base.h
+.\objects\spi.o: user\outputdata.h
+.\objects\spi.o: user\USART.h
+.\objects\spi.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\spi.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h

@@ -114,6 +114,7 @@ float PID_Control(PID_S *PID,float target,float now){
 	float err;
 	float err_dt;
 	float result;
+
 	err=target-now;
 	
 	err_dt=err-PID->last_err;
@@ -372,9 +373,9 @@ void Load_Prams(){
 	Error_Check(pitch_target,5);
 	Error_Check(roll_target,5);
 
-	Error_Check(a_x_offset,2);
-	Error_Check(a_y_offset,2);
-	Error_Check(a_z_offset,2);
+	Error_Check(w_x_offset,2);
+	Error_Check(w_y_offset,2);
+	Error_Check(w_z_offset,2);
 	
 	if(Pram_Error){
 		uprintf(USART,"load offset error!please adjust again!\r\n");

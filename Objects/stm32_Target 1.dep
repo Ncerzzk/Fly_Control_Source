@@ -698,7 +698,7 @@ I (.\Lib\inc\stm32f10x_spi.h)(0x4D783BB4)
 I (.\Lib\inc\stm32f10x_tim.h)(0x58A15EE2)
 I (.\Lib\inc\stm32f10x_usart.h)(0x4D783BB4)
 I (.\Lib\inc\misc.h)(0x4D783BB4)
-F (.\user\main.c)(0x59884C70)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
+F (.\user\main.c)(0x5989A49F)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
 I (.\CMSIS\stm32f10x.h)(0x5842A583)
 I (.\CMSIS\core_cm3.h)(0x4D523B58)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x569DEA3A)
@@ -735,7 +735,7 @@ I (user\USART.h)(0x59718BD5)
 I (D:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x569DEA3A)
 I (user\timer.h)(0x597578C8)
 I (user\mpu9250.h)(0x597FFB9A)
-I (user\i2c.h)(0x597EDAC8)
+I (user\i2c.h)(0x59888D2D)
 I (user\lt8910.h)(0x597ED9FE)
 I (user\set.h)(0x59831F95)
 I (user\angle.h)(0x59818E3F)
@@ -744,6 +744,7 @@ I (user\control.h)(0x59857C42)
 I (user\ms5611.h)(0x597FFC75)
 I (user\hmc5883.h)(0x59817588)
 I (user\SR04.h)(0x59853899)
+I (user\spi.h)(0x59894340)
 F (.\user\stm32f10x_it.c)(0x58F1C258)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\stm32f10x_it.o --omf_browse .\objects\stm32f10x_it.crf --depend .\objects\stm32f10x_it.d)
 I (user\stm32f10x_it.h)(0x58F1C251)
 I (.\CMSIS\stm32f10x.h)(0x5842A583)
@@ -775,8 +776,8 @@ I (.\Lib\inc\stm32f10x_usart.h)(0x4D783BB4)
 I (.\Lib\inc\stm32f10x_wwdg.h)(0x4D783BB4)
 I (.\Lib\inc\misc.h)(0x4D783BB4)
 F (.\startup\startup_stm32f10x_hd.s)(0x58F9BC7C)(--cpu Cortex-M3 -g --apcs=interwork -I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include--pd "__UVISION_VERSION SETA 518" --pd "STM32F10X_HD SETA 1"--list .\listings\startup_stm32f10x_hd.lst --xref -o .\objects\startup_stm32f10x_hd.o --depend .\objects\startup_stm32f10x_hd.d)
-F (.\user\i2c.c)(0x59718C00)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\i2c.o --omf_browse .\objects\i2c.crf --depend .\objects\i2c.d)
-I (user\i2c.h)(0x597EDAC8)
+F (.\user\i2c.c)(0x59888D1E)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\i2c.o --omf_browse .\objects\i2c.crf --depend .\objects\i2c.d)
+I (user\i2c.h)(0x59888D2D)
 I (user\base.h)(0x597ED90D)
 I (.\CMSIS\stm32f10x.h)(0x5842A583)
 I (.\CMSIS\core_cm3.h)(0x4D523B58)
@@ -807,9 +808,9 @@ I (.\Lib\inc\stm32f10x_usart.h)(0x4D783BB4)
 I (.\Lib\inc\stm32f10x_wwdg.h)(0x4D783BB4)
 I (.\Lib\inc\misc.h)(0x4D783BB4)
 I (user\outputdata.h)(0x5971A919)
-F (.\user\mpu9250.c)(0x597EB860)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\mpu9250.o --omf_browse .\objects\mpu9250.crf --depend .\objects\mpu9250.d)
+F (.\user\mpu9250.c)(0x59899F1A)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\mpu9250.o --omf_browse .\objects\mpu9250.crf --depend .\objects\mpu9250.d)
 I (user\mpu9250.h)(0x597FFB9A)
-I (user\i2c.h)(0x597EDAC8)
+I (user\i2c.h)(0x59888D2D)
 I (user\base.h)(0x597ED90D)
 I (.\CMSIS\stm32f10x.h)(0x5842A583)
 I (.\CMSIS\core_cm3.h)(0x4D523B58)
@@ -842,11 +843,11 @@ I (.\Lib\inc\misc.h)(0x4D783BB4)
 I (user\outputdata.h)(0x5971A919)
 I (user\BMP280.h)(0x58C523F1)
 I (D:\Keil_v5\ARM\ARMCC\include\limits.h)(0x569DEA3A)
-F (.\user\angle.c)(0x59847BA0)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\angle.o --omf_browse .\objects\angle.crf --depend .\objects\angle.d)
+F (.\user\angle.c)(0x5989A050)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\angle.o --omf_browse .\objects\angle.crf --depend .\objects\angle.d)
 I (user\angle.h)(0x59818E3F)
 I (D:\Keil_v5\ARM\ARMCC\include\math.h)(0x569DEA3A)
 I (user\mpu9250.h)(0x597FFB9A)
-I (user\i2c.h)(0x597EDAC8)
+I (user\i2c.h)(0x59888D2D)
 I (user\base.h)(0x597ED90D)
 I (.\CMSIS\stm32f10x.h)(0x5842A583)
 I (.\CMSIS\core_cm3.h)(0x4D523B58)
@@ -1010,7 +1011,7 @@ I (.\Lib\inc\misc.h)(0x4D783BB4)
 F (.\user\BMP280.c)(0x5194AF49)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\bmp280.o --omf_browse .\objects\bmp280.crf --depend .\objects\bmp280.d)
 I (user\BMP280.h)(0x58C523F1)
 I (D:\Keil_v5\ARM\ARMCC\include\limits.h)(0x569DEA3A)
-F (.\user\control.c)(0x598851D1)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\control.o --omf_browse .\objects\control.crf --depend .\objects\control.d)
+F (.\user\control.c)(0x5989A173)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\control.o --omf_browse .\objects\control.crf --depend .\objects\control.d)
 I (user\control.h)(0x59857C42)
 I (.\CMSIS\stm32f10x.h)(0x5842A583)
 I (.\CMSIS\core_cm3.h)(0x4D523B58)
@@ -1046,7 +1047,7 @@ I (user\set.h)(0x59831F95)
 I (user\angle.h)(0x59818E3F)
 I (D:\Keil_v5\ARM\ARMCC\include\math.h)(0x569DEA3A)
 I (user\mpu9250.h)(0x597FFB9A)
-I (user\i2c.h)(0x597EDAC8)
+I (user\i2c.h)(0x59888D2D)
 I (user\USART.h)(0x59718BD5)
 I (D:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x569DEA3A)
 I (D:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x569DEA3A)
@@ -1210,13 +1211,13 @@ I (.\Lib\inc\stm32f10x_wwdg.h)(0x4D783BB4)
 I (.\Lib\inc\misc.h)(0x4D783BB4)
 I (user\outputdata.h)(0x5971A919)
 I (user\ms5611.h)(0x597FFC75)
-I (user\i2c.h)(0x597EDAC8)
+I (user\i2c.h)(0x59888D2D)
 I (user\set.h)(0x59831F95)
 I (user\USART.h)(0x59718BD5)
 I (D:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x569DEA3A)
 I (D:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x569DEA3A)
 I (user\SR04.h)(0x59853899)
-F (.\user\HMC5883.c)(0x598186FD)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\hmc5883.o --omf_browse .\objects\hmc5883.crf --depend .\objects\hmc5883.d)
+F (.\user\HMC5883.c)(0x5989B2C7)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\CMSIS -I .\Lib\inc -I .\Lib\src -I .\Startup -I .\User-I C:\Users\ncer\Desktop\¬Ã¿”„\RTE-I D:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-I D:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="518" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\hmc5883.o --omf_browse .\objects\hmc5883.crf --depend .\objects\hmc5883.d)
 I (user\base.h)(0x597ED90D)
 I (.\CMSIS\stm32f10x.h)(0x5842A583)
 I (.\CMSIS\core_cm3.h)(0x4D523B58)
@@ -1247,7 +1248,7 @@ I (.\Lib\inc\stm32f10x_usart.h)(0x4D783BB4)
 I (.\Lib\inc\stm32f10x_wwdg.h)(0x4D783BB4)
 I (.\Lib\inc\misc.h)(0x4D783BB4)
 I (user\outputdata.h)(0x5971A919)
-I (user\i2c.h)(0x597EDAC8)
+I (user\i2c.h)(0x59888D2D)
 I (user\mpu9250.h)(0x597FFB9A)
 I (user\USART.h)(0x59718BD5)
 I (D:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x569DEA3A)

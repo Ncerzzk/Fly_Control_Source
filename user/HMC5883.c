@@ -179,12 +179,12 @@ void hmc5883lRead(int16_t *magData)
     //i2cRead(MAG_ADDRESS, MAG_DATA_REGISTER, 6, buf);
     // During calibration, magGain is 1.0, so the read returns normal non-calibrated values.
     // After calibration is done, magGain is set to calculated gain values.
-    mag[0] = (int16_t)(buf[0] << 8 | buf[1]) * magGain[0];   //X
-    mag[2] = (int16_t)(buf[2] << 8 | buf[3]) * magGain[2];		//Z
-    mag[1] = (int16_t)(buf[4] << 8 | buf[5]) * magGain[1];		//Y
+    mag[0] = (int16_t)(buf[0] << 8 | buf[1]) ;//* magGain[0];   //X
+    mag[2] = (int16_t)(buf[2] << 8 | buf[3]) ;//* magGain[2];		//Z
+    mag[1] = (int16_t)(buf[4] << 8 | buf[5]);// * magGain[1];		//Y
 	
-		magData[0]=-mag[0];
-		magData[1]=-mag[1];
+		magData[0]=mag[0];
+		magData[1]=mag[1];
 		magData[2]=mag[2];
 }
 
@@ -195,13 +195,13 @@ void HMC_Get_Mag(void){
 	if(MAG_Cnt>=8){
 		MPU_Single_Write(INT_PIN_CFG,0x02);    //MPU6500 开启路过模式
 		hmc5883lRead(temp);
-		Mag_X=temp[0];
-		Mag_Y=temp[1];
-		Mag_Z=temp[2];
+		Mag_X=(float)temp[0]/1090.0;
+		Mag_Y=(float)temp[1]/1090.0;
+		Mag_Z=(float)temp[2]/1090.0;
 
 		MAG_Cnt=0;
-		//Adjust_HMC();
-		//uprintf(USART,"%f,%f,%f \r\n",Mag_X,Mag_Y,Mag_Z);
+		Adjust_HMC();
+		//uprintf(USART,"%f,%f,%f\r\n",Mag_X,Mag_Y,Mag_Z);
 	}
 }
 typedef struct {
@@ -216,15 +216,15 @@ Axis3f MagOffset;   // 磁力计偏移量参数
 float B[6];                   // 磁力计校准B参数
 
 void Adjust_HMC(void){
-	B[0]=1.01417350414308;
-	B[1]=-0.00205150481501056;
-	B[2]=-0.0181138629569933;
-	B[3]=0.89417833712352;
-	B[4]=0.000881571931539225;
-	B[5]=1.10304523838616;
-	MagOffset.x=-0.126506588415585;
-	MagOffset.y=0.365400373808692;
-	MagOffset.z=-0.0351184919652291;
+	B[0]=0.93613258676408;
+	B[1]=0.00267184778915339;
+	B[2]=0.0259231678709882;
+	B[3]=0.953676023637478;
+	B[4]=0.0035936506696941;
+	B[5]=1.12085263700066;
+	MagOffset.x=-0.0114886290660598;
+	MagOffset.y=-0.11362460257489;
+	MagOffset.z=0.0678062294292163;
 	
 	tmp3f.x = Mag_X - MagOffset.x;
 	tmp3f.y = Mag_Y - MagOffset.y;

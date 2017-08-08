@@ -125,6 +125,30 @@ void I2C_ForceEnd(I2C_TypeDef * I2Cn){
 
 }
 
+void I2C_Test(){
+	int i=50000;
+	I2C_GenerateSTART(I2C_USE, ENABLE);
+  while(!I2C_CheckEvent(I2C_USE, I2C_EVENT_MASTER_MODE_SELECT)){
+		if(!--i)
+			return ;
+	}
+	I2C_Send7bitAddress(I2C_USE, 0xA0, I2C_Direction_Transmitter);          // 发送 丛机地址 地址、状态（写）
+	
+	i=50000;
+	while(!I2C_CheckEvent(I2C_USE, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)){
+		if(!--i)
+			return ;		
+	}
+	
+	I2C_SendData(I2C_USE, 0x05);
+	i=50000;
+	while(!I2C_CheckEvent(I2C_USE, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){
+		if(!--i)
+			return ;		
+	}
+	I2C_GenerateSTOP(I2C_USE, ENABLE);          //发送结束信号
+	
+}
 void I2C_ByteWrite(I2C_TypeDef * I2Cn,u8 slaveAddr, u8 pBuffer, u8 writeAddr)
 {
 	

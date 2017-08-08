@@ -14,7 +14,7 @@ typedef enum dataType{
 }dataType;
 
 
-
+void I2C_Test(void);
 void I2C_init(I2C_TypeDef * I2Cn);
 void I2C_ByteWrite(I2C_TypeDef * I2Cn,u8 slaveAddr, u8 pBuffer, u8 writeAddr);
 void I2C_BufferRead(I2C_TypeDef * I2Cn,u8 slaveAddr, u8* pBuffer, u8 readAddr, u16 NumByteToRead);

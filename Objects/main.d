@@ -46,3 +46,4 @@
 .\objects\main.o: user\ms5611.h
 .\objects\main.o: user\hmc5883.h
 .\objects\main.o: user\SR04.h
+.\objects\main.o: user\spi.h

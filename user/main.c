@@ -14,6 +14,8 @@
 
 
 #include "SR04.h"
+#include "spi.h"
+
 GPIO_InitTypeDef GPIO_InitStructure;
 u8 TIM3CH1_CAPTURE_STA=0; //输入捕获状态
 //bit7:捕获完成标志 
@@ -24,17 +26,20 @@ u32 TIM3CH1_CAPTURE_VAL;//输入捕获值
 
 void main(){
 	int temp;
-	
+	char tx_buff[2]={0x55,0x65};
 	SystemInit();
 	Usart_Init(USART,115200);
 	
 	uprintf(USART,"Hello,world!\r\n");
-
+	
+	
 	delay_init(72);
+	
+	
 	MPU_init();
 	//ms5611_init();
 	
-	//hmc5883lInit();
+	hmc5883lInit();
 	
 	TIMER_Init(TIM6);
 	if(CAP_TIM==TIM3){
@@ -81,7 +86,7 @@ void main(){
 // 		}
 		
 			if(Send_Angle){
-				//send_wave((int)(pitch*10),(int)(roll*10),(int)(accel_speed_Z*10),(int)(Roll_PID.i*10));//标定角度正方向
+				send_wave((int)(pitch*10),(int)(roll*10),(int)(yaw*10),(int)(Roll_PID.i*10));//标定角度正方向
 				//send_wave((int)(angle_speed_X*100),(int)(angle_speed_Y*100),(int)(angle_speed_Z*100),0);//标定角速度正方向
 				    
 				//send_wave((int)Angle_Speed_X_Out,(int)Angle_Speed_Y_Out,0,0);
@@ -89,7 +94,7 @@ void main(){
 				//send_wave((int)CH1_Out,(int)CH2_Out,(int)CH3_Out,(int)CH4_Out);
 				//send_wave((int)Angle_Speed_Y_Out,(int)Angle_Speed_X_Out,(int)pitch,(int)roll);
 				//send_wave((int)Angle_Speed_X_Out,(int)(ANGLE_SPEED_X_PID.i*100),(int)(angle_speed_X*10),(int)roll);
-				send_wave((int)(height),(int)(kal_acc_z.kal_out),(int)(Height_PID.i),(int)(SR04_V));
+				//send_wave((int)(height),(int)(kal_acc_z.kal_out),(int)(Height_PID.i),(int)(SR04_V));
 			}
 			//uprintf(USART,"Height:%f\r\n",height);
 	}
@@ -105,6 +110,34 @@ typedef enum{
 
 cap_state state=WAIT_RISING;
 
+
+
+
+//void EXTI9_5_IRQHandler(void)
+//{
+//		u8 Status[1];
+//    if (EXTI_GetITStatus(EXTI_Line7) != RESET)
+//    {
+//        EXTI_ClearITPendingBit(EXTI_Line11); //清除标志
+
+//				SPI_CE_LOW();//拉低待机，才能操作寄存器
+//				delay_us(100);
+//				SPI_NRF_Read(SPI2,NRF_READ_REG+STATUS,Status,1);//读取Status
+//				switch(Status[0]&0x0e) 
+//				{
+//				case 0x0e: 
+//					uprintf(USART,"no rx");
+//					break; //RX_FIFO 空
+//				default :
+//						uprintf(USART,"rx");
+//						break;
+
+//				}
+
+//				SPI_NRF_Read(SPI1,RD_RX_PLOAD,RBuff,4);//读RX_FIFO
+//				SPI_NRF_Write(SPI1,NRF_WRITE_REG+STATUS,Status,1);//处理状态寄存器标志
+//    }
+//}
 
 /*
 void TIM3_IRQHandler(void)
@@ -215,8 +248,8 @@ void TIM6_IRQHandler(void){
 				Get_Accel_Angle();
 				break;
 			case 2:
-				IMU_Update(accel_speed_X,accel_speed_Y,accel_speed_Z,angle_speed_X,angle_speed_Y,angle_speed_Z);
-				//AHR_Update(accel_speed_X,accel_speed_Y,accel_speed_Z,angle_speed_X,angle_speed_Y,angle_speed_Z,Mag_X,Mag_Y,Mag_Z);
+				//IMU_Update(accel_speed_X,accel_speed_Y,accel_speed_Z,angle_speed_X,angle_speed_Y,angle_speed_Z);
+				AHR_Update(accel_speed_X,accel_speed_Y,accel_speed_Z,angle_speed_X,angle_speed_Y,angle_speed_Z,Mag_X,Mag_Y,Mag_Z);
 				//Get_Angle();
 				break;
 			case 3:
@@ -234,7 +267,7 @@ void TIM6_IRQHandler(void){
 				}
 				break;
 			case 0:
-				//HMC_Get_Mag();    //20ms 一次
+				HMC_Get_Mag();    //20ms 一次
 				
 				
 				break;

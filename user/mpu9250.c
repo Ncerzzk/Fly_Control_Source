@@ -43,6 +43,11 @@ void MPU_init(){
 	
 	delay_us(1000*500);
 	
+//	while(1){
+//		I2C_Test();
+//	}
+	//I2C_ByteWrite(I2C_USE,0xA0,0x01,0x02);    //测试I2C从机用
+	
 	MPU_Single_Write(PWR_MGMT_1,0x00);
 	MPU_Single_Write(SMPLRT_DIV, 0x00);
 	MPU_Single_Write(CONFIG, 0x02);  //之前延时为20ms(0x06，现在为3ms左右 0x02)
