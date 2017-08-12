@@ -57,8 +57,8 @@ void TIMER_Init(TIM_TypeDef *TIMER){
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE);
 		NVIC_InitStructure.NVIC_IRQChannel = TIM7_IRQn;		
 	}
-	
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);

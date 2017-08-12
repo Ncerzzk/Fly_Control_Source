@@ -23,9 +23,16 @@ u8 TIM3CH1_CAPTURE_STA=0; //输入捕获状态
 //bit5~0：捕获到高电平后定时器溢出的次数
 u32 TIM3CH1_CAPTURE_VAL;//输入捕获值
 
+void Get_Position();
+void Check_Position(u8 x,u8 y);
+
+u8 rx_ok;
+unsigned char serial_buf[30]={0};
+int serial_cnt=0;
 
 void main(){
 	int temp;
+	int i=0;
 	char tx_buff[2]={0x55,0x65};
 	SystemInit();
 	Usart_Init(USART,115200);
@@ -41,7 +48,7 @@ void main(){
 	
 	hmc5883lInit();
 	
-	TIMER_Init(TIM6);
+	//TIMER_Init(TIM6);
 	if(CAP_TIM==TIM3){
 		TIM3_Cap_Init();
 	}
@@ -49,8 +56,8 @@ void main(){
 	Brushless_Init();
 	//Brush_Init();
 	Load_Prams();
-	pitch_target=-2.85;     //3.25
-	roll_target=0.3;  //48.5
+	pitch_target=PITCH_CONSTANT;     //3.25
+	roll_target=ROLL_CONSTANT;  //48.5
 	Write_Prams();
 	uprintf(USART,"in  it ok!\r\n");
 	
@@ -61,6 +68,34 @@ void main(){
 	
 	
 	while(1){	
+//		if(rx_ok){
+//			for(i=0;i<30&&serial_buf[i]!=253;++i){
+//				if(serial_buf[0]==0){		//如果是阵头
+//					if(serial_buf[1]!=253){
+//						Check_Position(serial_buf[1],serial_buf[2]);
+//					}else{
+//						;
+//					}
+//				}else{
+//					switch(serial_buf[0]){
+////						case 'f':
+////							Fly_Init();
+////							break;
+////						case 's':
+////							Fly_Stop();
+////							break;
+////						case 'w':
+////							Fly_Up();
+////							break;
+////						case ',':
+////							Fly_Land();
+////							break;
+//					}
+//				}
+//			}
+//			rx_ok=0;
+//		}
+
 			//send_wave((int)(gravity_Y*100),(int)(pitch),(int)(kal_ac_y.kal_out*100),(int)(a_y*100));
 		//send_wave((int)roll,(int)height*10,(int)angle_speed_X,(int)pitch);
 		//uprintf(USART1,"%f\r\n",fly_speed);
@@ -71,7 +106,7 @@ void main(){
 		//uprintf(USART,"%f\r\n",height);
 		
 		/*
-		1、标定角度正方向  pitch前倾为负   roll左倾为正   顺时针为负
+		1、标定角度正方向  pitch前倾为负   roll左倾为正   顺时针为负(左转为正）
 		2、标定角速度正方向  X左倾为正   Y前倾为正 Z 顺时针为正
 		3、根据此正方向，修改PID中参数的符号
 		*/
@@ -86,9 +121,9 @@ void main(){
 // 		}
 		
 			if(Send_Angle){
-				send_wave((int)(pitch*10),(int)(roll*10),(int)(yaw*10),(int)(Roll_PID.i*10));//标定角度正方向
-				//send_wave((int)(angle_speed_X*100),(int)(angle_speed_Y*100),(int)(angle_speed_Z*100),0);//标定角速度正方向
-				    
+				//send_wave((int)(pitch),(int)(roll),(int)(yaw),(int)(yaw_dealed));//标定角度正方向
+			//	send_wave((int)(angle_speed_X*100),(int)(angle_speed_Y*100),(int)(angle_speed_Z*100),0);//标定角速度正方向
+				   send_wave((int)CH1_Out,(int)CH2_Out,(int)CH3_Out,(int)CH4_Out); 
 				//send_wave((int)Angle_Speed_X_Out,(int)Angle_Speed_Y_Out,0,0);
 				//send_wave((int)CH1_Out,(int)Pitch_Out,(int)Roll_PID.i,(int)Pitch_PID.i);
 				//send_wave((int)CH1_Out,(int)CH2_Out,(int)CH3_Out,(int)CH4_Out);
@@ -109,76 +144,6 @@ typedef enum{
 }cap_state;
 
 cap_state state=WAIT_RISING;
-
-
-
-
-//void EXTI9_5_IRQHandler(void)
-//{
-//		u8 Status[1];
-//    if (EXTI_GetITStatus(EXTI_Line7) != RESET)
-//    {
-//        EXTI_ClearITPendingBit(EXTI_Line11); //清除标志
-
-//				SPI_CE_LOW();//拉低待机，才能操作寄存器
-//				delay_us(100);
-//				SPI_NRF_Read(SPI2,NRF_READ_REG+STATUS,Status,1);//读取Status
-//				switch(Status[0]&0x0e) 
-//				{
-//				case 0x0e: 
-//					uprintf(USART,"no rx");
-//					break; //RX_FIFO 空
-//				default :
-//						uprintf(USART,"rx");
-//						break;
-
-//				}
-
-//				SPI_NRF_Read(SPI1,RD_RX_PLOAD,RBuff,4);//读RX_FIFO
-//				SPI_NRF_Write(SPI1,NRF_WRITE_REG+STATUS,Status,1);//处理状态寄存器标志
-//    }
-//}
-
-/*
-void TIM3_IRQHandler(void)
-{ 
-
- 	if((TIM3CH1_CAPTURE_STA&0X80)==0)//还未成功捕获	 与第七位与
-	{	  
-		if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)   //溢出标志
-		 
-		{	    
-			if(TIM3CH1_CAPTURE_STA&0X40)//已经捕获到高电平了
-			{
-				if((TIM3CH1_CAPTURE_STA&0X3F)==0X3F)//高电平太长了
-				{
-					TIM3CH1_CAPTURE_STA|=0X80;//标记成功捕获了一次
-					TIM3CH1_CAPTURE_VAL=0XFFFF;
-				}else TIM3CH1_CAPTURE_STA++;
-			}	 
-		}
-		if (TIM_GetITStatus(TIM3, TIM_IT_CC1) != RESET)//捕获1发生捕获事件
-			{	
-				if(TIM3CH1_CAPTURE_STA&0X40)		//捕获到一个下降沿 		
-				{	  			
-					TIM3CH1_CAPTURE_STA|=0X80;		//标记成功捕获到一次上升沿
-					TIM3CH1_CAPTURE_VAL=TIM_GetCapture1(TIM3);
-					TIM_OC1PolarityConfig(TIM3,TIM_ICPolarity_Rising); //CC1P=0 设置为上升沿捕获
-				}else  								//还未开始,第一次捕获上升沿
-				{
-					TIM3CH1_CAPTURE_STA=0;			//清空
-					TIM3CH1_CAPTURE_VAL=0;
-					TIM_SetCounter(TIM3,0);
-					TIM3CH1_CAPTURE_STA|=0X40;		//标记捕获到了上升沿
-					TIM_OC1PolarityConfig(TIM3,TIM_ICPolarity_Falling);		//CC1P=1 设置为下降沿捕获
-				}		    
-			}			     	    					   
- 	}
- 
-    TIM_ClearITPendingBit(TIM3, TIM_IT_CC1|TIM_IT_Update); //清除中断标志位
- 
-}*/
-
 
 
 void TIM3_IRQHandler(void)  
@@ -238,6 +203,7 @@ int save=0;
 
 int temp;
 
+
 void TIM6_IRQHandler(void){
 	if (TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET){
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update);
@@ -248,8 +214,8 @@ void TIM6_IRQHandler(void){
 				Get_Accel_Angle();
 				break;
 			case 2:
-				//IMU_Update(accel_speed_X,accel_speed_Y,accel_speed_Z,angle_speed_X,angle_speed_Y,angle_speed_Z);
-				AHR_Update(accel_speed_X,accel_speed_Y,accel_speed_Z,angle_speed_X,angle_speed_Y,angle_speed_Z,Mag_X,Mag_Y,Mag_Z);
+			IMU_Update2(accel_speed_X,accel_speed_Y,accel_speed_Z,angle_speed_X,angle_speed_Y,angle_speed_Z);
+			AHR_Update(accel_speed_X,accel_speed_Y,accel_speed_Z,angle_speed_X,angle_speed_Y,angle_speed_Z,Mag_X,Mag_Y,Mag_Z);
 				//Get_Angle();
 				break;
 			case 3:
@@ -269,7 +235,6 @@ void TIM6_IRQHandler(void){
 			case 0:
 				HMC_Get_Mag();    //20ms 一次
 				
-				
 				break;
 			default:
 				break;
@@ -279,236 +244,341 @@ void TIM6_IRQHandler(void){
 		TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
 	}	
 }
+
+
+#define SERIAL_END  253
+#define SERIAL_START 0
+
 void UART4_IRQHandler(void){
-	char c;
+	unsigned char c;
 	if(USART_GetITStatus(USART, USART_IT_RXNE) != RESET) {  
 		USART_ClearITPendingBit(USART,USART_IT_RXNE); 
 		c=USART_ReceiveData(USART);
-		switch(c){
-			case '1':
-				Roll_PID.KI+=0.01;
-				clear_i(Roll_PID);
-				uprintf(USART,"Roll_PID.i=%f\r\n",Roll_PID.KI);
-				break;
-			case '2':
-				Roll_PID.KI-=0.01;
-				clear_i(Roll_PID);
-				uprintf(USART,"Roll_PID.i=%f\r\n",Roll_PID.KI);
-				break;
-			case 't':
-				Send_Angle=!Send_Angle;
-				Height_PID.i=0;
-				uprintf(USART,"SEND change!\r\n");
-				break;
-			case 'd':
-				Debug=!Debug;
-				uprintf(USART,"Debug=  %d\r\n",Debug);
-				break;
-			case 'f':
-				Fly_Init();
-				uprintf(USART,"start fly!\r\n");
-				break;
-			case 's':
-				Fly_Stop();
-				uprintf(USART,"stop fly!\r\n");
-				break;
-			case 'w':
-				Fly_Up();
-				uprintf(USART,"fly up !!\r\n");
-				break;
-			case 'p':
-				Roll_PID.KP+=0.01;
-				Pitch_PID.KP-=0.01;
-				uprintf(USART,"pitch_P=%f    roll_P=%f \r\n",Pitch_PID.KP,Roll_PID.KP);
+		if(Serial_Flag){
+			serial_cnt++;
+			serial_buf[serial_cnt]=c;
 			
-				break;
-			case 'q':
-				Roll_PID.KP-=0.01;
-				Pitch_PID.KP+=0.01;
-				uprintf(USART,"pitch_P=%f    roll_P=%f \r\n",Pitch_PID.KP,Roll_PID.KP);
-				break;
-			case 'a':
-
-//				Set_Brushless_Speed(1,10);
-//				Set_Brushless_Speed(2,10);
-//				Set_Brushless_Speed(3,10);
-//				Set_Brushless_Speed(4,10);
-				base_duty+=0.3;
-				uprintf(USART,"base_duty=%f\r\n",base_duty);
-//				uprintf(USART,"CCR=%d\r\n",TIM1->CCR1);
-				break;
-			case 'b':
-//				Brushless_Stop();
-//				uprintf(USART,"CCR2=%d\r\n",TIM1->CCR2);
-				base_duty-=0.3;
-				uprintf(USART,"base_duty=%f\r\n",base_duty);
-				break;
-			case 'i':
-				ANGLE_SPEED_X_PID.KD+=0.1;
-				ANGLE_SPEED_Y_PID.KD+=0.1;
-				uprintf(USART,"ANGLE_SPEED_X_PID.KD=%f\r\n",ANGLE_SPEED_X_PID.KD);
-				break;
-			case 'o':
-				ANGLE_SPEED_X_PID.KD-=0.1;
-				ANGLE_SPEED_Y_PID.KD-=0.1;
-				uprintf(USART,"ANGLE_SPEED_X_PID.KD=%f\r\n",ANGLE_SPEED_X_PID.KD);
-				break;	
-			case 'e':
-				roll_target+=0.1;
-				uprintf(USART,"roll_target=%f\r\n",roll_target);
-				break;					
-			case 'r':
-				roll_target-=0.1;
-				uprintf(USART,"roll_target=%f\r\n",roll_target);
-				break;
-			case 'z':
-				ANGLE_SPEED_X_PID.KI-=0.1;
-				ANGLE_SPEED_Y_PID.KI-=0.1;
-				clear_i(ANGLE_SPEED_X_PID);
-				clear_i(ANGLE_SPEED_Y_PID);
-				uprintf(USART,"angle_speed_ki=%f\r\n",ANGLE_SPEED_X_PID.KI);
-				break;
-			case 'x':
-				ANGLE_SPEED_X_PID.KI+=0.1;
-				ANGLE_SPEED_Y_PID.KI+=0.1;
-				clear_i(ANGLE_SPEED_X_PID);
-				clear_i(ANGLE_SPEED_Y_PID);
-				uprintf(USART,"angle_speed_ki=%f\r\n",ANGLE_SPEED_X_PID.KI);
-				break;
-			case 'c':
-				ANGLE_SPEED_Z_PID.KP+=0.1;
-				uprintf(USART,"yaw_KP=%f\r\n",ANGLE_SPEED_Z_PID.KP);
-				break;
-			case 'v':
-				ANGLE_SPEED_Z_PID.KP-=0.1;
-				uprintf(USART,"yaw_KP=%f\r\n",ANGLE_SPEED_Z_PID.KP);
-				break;				
-			case 'n':
-				Velocity_PID.KI+=0.001;
-				clear_i(Velocity_PID);
-				uprintf(USART,"Velocity_PID.KI=%f\r\n",Velocity_PID.KI);
-				break;
-			case 'm':
-				Velocity_PID.KI-=0.001;
-				clear_i(Velocity_PID);
-				uprintf(USART,"Velocity_PID.KI=%f\r\n",Velocity_PID.KI);
-				break;
-
-			case 'k':
-				Velocity_PID.KP+=0.01;
-				uprintf(USART,"V_PID.KP=%f\r\n",Velocity_PID.KP);
-//				Height_PID.KP+=0.1;
-//				uprintf(USART,"Height_PID.KP=%f\r\n",Height_PID.KP);
-				break;
-			case 'l':
-				Velocity_PID.KP-=0.01;
-				uprintf(USART,"V_PID.KP=%f\r\n",Velocity_PID.KP);
-//				Height_PID.KP-=0.1;
-//				uprintf(USART,"Height_PID.KP=%f\r\n",Height_PID.KP);
-				break;		
-			case 'g':
-				Velocity_PID.KD+=0.1;
-				uprintf(USART,"Velocity_PID.KD=%f\r\n",Velocity_PID.KD);
-				break;	
-			case 'h':
-				Velocity_PID.KD-=0.1;
-				uprintf(USART,"Velocity_PID.KD=%f\r\n",Velocity_PID.KD);
-				break;	
-			case 'y':
-				ANGLE_SPEED_X_PID.KP-=0.1;	//内环P
-				ANGLE_SPEED_Y_PID.KP-=0.1;
-				uprintf(USART,"ANGLE_SPEED_X_PID.KP=%f\r\n",ANGLE_SPEED_X_PID.KP);
-				break;
-			case 'u':
-				ANGLE_SPEED_X_PID.KP+=0.1;  //内环P
-				ANGLE_SPEED_Y_PID.KP+=0.1;
-				uprintf(USART,"ANGLE_SPEED_X_PID.KP=%f\r\n",ANGLE_SPEED_X_PID.KP);
-				break;
-	
-			case '3':
-				Adjust_Gyro();   //取陀螺仪零偏
+			if(c==0xFD){
+				Serial_Flag=0;
+				serial_cnt=0;
+				Get_Position();
+			}
+			if(serial_cnt==10){
+				serial_cnt=0;
+				Serial_Flag=0;
+			}
+			return ;
+		}else{
+			switch(c){
+				case 'f':
+					Fly_Init();
+					uprintf(USART,"start fly!\r\n");
+					break;
+				case 's':
+					Fly_Stop();
+					uprintf(USART,"stop fly!\r\n");
+					break;
+				case 'w':
+					Fly_Up(); 
+					uprintf(USART,"fly up !!\r\n");
+					break;
+				case ',':
+					Fly_Land();
+					uprintf(USART,"LAND!\r\n");
+					break;
+				case 0:
+					Serial_Flag=1;
+					serial_cnt=0;
+					serial_buf[0]=0;
+					break;
+				#ifdef BLUE_DEBUG
+					case '1':
+						Roll_PID.KI+=0.01;
+						clear_i(Roll_PID);
+						uprintf(USART,"Roll_PID.i=%f\r\n",Roll_PID.KI);
+						break;
+					case '2':
+						Roll_PID.KI-=0.01;
+						clear_i(Roll_PID);
+						uprintf(USART,"Roll_PID.i=%f\r\n",Roll_PID.KI);
+						break;
+					case 't':
+						Send_Angle=!Send_Angle;
+						Height_PID.i=0;
+						uprintf(USART,"SEND change!\r\n");
+						break;
+					case 'd':
+						Debug=!Debug;
+						uprintf(USART,"Debug=  %d\r\n",Debug);
+						break;
+					case 'p':
+						Roll_PID.KP+=0.01;
+						Pitch_PID.KP-=0.01;
+						uprintf(USART,"pitch_P=%f    roll_P=%f \r\n",Pitch_PID.KP,Roll_PID.KP);
+					
+						break;
+					case 'q':
+						Roll_PID.KP-=0.01;
+						Pitch_PID.KP+=0.01;
+						uprintf(USART,"pitch_P=%f    roll_P=%f \r\n",Pitch_PID.KP,Roll_PID.KP);
+						break;
+					case 'a':
+						TIM1->CCR1+=10;
+						TIM1->CCR2+=10;
+						TIM1->CCR3+=10;
+						TIM1->CCR4+=10;
+					uprintf(USART,"CCR=%d\r\n",TIM1->CCR1);
+//						Set_Brushless_Speed(1,10);
+//						Set_Brushless_Speed(2,10);
+//						Set_Brushless_Speed(3,10);
+//						Set_Brushless_Speed(4,10);
+						//base_duty+=0.3;
+//						uprintf(USART,"base_duty=%f\r\n",base_duty);
 				
-				break;
-			case '4':
-				Load_Prams();
-				break;
-			case '5':
-				Write_Prams();  //写参数 
-				break;
-			
+						break;
+					case 'b':
+//		//				Brushless_Stop();
+//		//				uprintf(USART,"CCR2=%d\r\n",TIM1->CCR2);
+//						base_duty-=0.3;
+//						uprintf(USART,"base_duty=%f\r\n",base_duty);
+//						break;
+						TIM1->CCR1-=10;
+						TIM1->CCR2-=10;
+						TIM1->CCR3-=10;
+						TIM1->CCR4-=10;
+					uprintf(USART,"CCR=%d\r\n",TIM1->CCR1);
+					case 'i':
+						TIM1->CCR1=520;
+						TIM1->CCR2=520;
+						TIM1->CCR3=520;
+						TIM1->CCR4=520;
+//						ANGLE_SPEED_X_PID.KD+=0.1;
+//						ANGLE_SPEED_Y_PID.KD+=0.1;
+//						uprintf(USART,"ANGLE_SPEED_X_PID.KD=%f\r\n",ANGLE_SPEED_X_PID.KD);
+						uprintf(USART,"HIGHEST!\r\n");
+						break;
+					case 'o':
+//						ANGLE_SPEED_X_PID.KD-=0.1;
+//						ANGLE_SPEED_Y_PID.KD-=0.1;
+//						uprintf(USART,"ANGLE_SPEED_X_PID.KD=%f\r\n",ANGLE_SPEED_X_PID.KD);
+						TIM1->CCR1=270;
+						TIM1->CCR2=270;
+						TIM1->CCR3=270;
+						TIM1->CCR4=270;
+						uprintf(USART,"LOWEST!\r\n");
+						break;	
+					case 'e':
+						roll_target+=0.1;
+						uprintf(USART,"roll_target=%f\r\n",roll_target);
+						break;					
+					case 'r':
+						roll_target-=0.1;
+						uprintf(USART,"roll_target=%f\r\n",roll_target);
+						break;
+					case 'z':
+						ANGLE_SPEED_X_PID.KI-=0.1;
+						ANGLE_SPEED_Y_PID.KI-=0.1;
+						clear_i(ANGLE_SPEED_X_PID);
+						clear_i(ANGLE_SPEED_Y_PID);
+						uprintf(USART,"angle_speed_ki=%f\r\n",ANGLE_SPEED_X_PID.KI);
+						break;
+					case 'x':
+						ANGLE_SPEED_X_PID.KI+=0.1;
+						ANGLE_SPEED_Y_PID.KI+=0.1;
+						clear_i(ANGLE_SPEED_X_PID);
+						clear_i(ANGLE_SPEED_Y_PID);
+						uprintf(USART,"angle_speed_ki=%f\r\n",ANGLE_SPEED_X_PID.KI);
+						break;
+					case 'c':
+						ANGLE_SPEED_Z_PID.KP+=0.1;
+						uprintf(USART,"yaw_KP=%f\r\n",ANGLE_SPEED_Z_PID.KP);
+						break;
+					case 'v':
+						ANGLE_SPEED_Z_PID.KP-=0.1;
+						uprintf(USART,"yaw_KP=%f\r\n",ANGLE_SPEED_Z_PID.KP);
+						break;				
+					case 'n':
+						Velocity_PID.KI+=0.001;
+						clear_i(Velocity_PID);
+						uprintf(USART,"Velocity_PID.KI=%f\r\n",Velocity_PID.KI);
+						break;
+					case 'm':
+						Velocity_PID.KI-=0.001;
+						clear_i(Velocity_PID);
+						uprintf(USART,"Velocity_PID.KI=%f\r\n",Velocity_PID.KI);
+						break;
 
-			case '7':
-				Height_Out=15;
-				//roll_target=10;
-				uprintf(USART,"height_out =15!!\r\n");
-				break;
-			case '8':
-				Height_Out=0;
-				uprintf(USART,"Height_Out =0!!\r\n");
-				break;
-			case '9':
-				Roll_Out=0;
-				uprintf(USART,"roll_out =0!!\r\n");
-				break;
-			case '0':
-				Roll_Out=5;
-				uprintf(USART,"roll_out =5!!\r\n");
-				break;
+					case 'k':
+						Velocity_PID.KP+=0.01;
+						uprintf(USART,"V_PID.KP=%f\r\n",Velocity_PID.KP);
+		//				Height_PID.KP+=0.1;
+		//				uprintf(USART,"Height_PID.KP=%f\r\n",Height_PID.KP);
+						break;
+					case 'l':
+						Velocity_PID.KP-=0.01;
+						uprintf(USART,"V_PID.KP=%f\r\n",Velocity_PID.KP);
+		//				Height_PID.KP-=0.1;
+		//				uprintf(USART,"Height_PID.KP=%f\r\n",Height_PID.KP);
+						break;		
+					case 'g':
+						Velocity_PID.KD+=0.1;
+						uprintf(USART,"Velocity_PID.KD=%f\r\n",Velocity_PID.KD);
+						break;	
+					case 'h':
+						Velocity_PID.KD-=0.1;
+						uprintf(USART,"Velocity_PID.KD=%f\r\n",Velocity_PID.KD);
+						break;	
+					case 'y':
+						ANGLE_SPEED_X_PID.KP-=0.1;	//内环P
+						ANGLE_SPEED_Y_PID.KP-=0.1;
+						uprintf(USART,"ANGLE_SPEED_X_PID.KP=%f\r\n",ANGLE_SPEED_X_PID.KP);
+						break;
+					case 'u':
+						ANGLE_SPEED_X_PID.KP+=0.1;  //内环P
+						ANGLE_SPEED_Y_PID.KP+=0.1;
+						uprintf(USART,"ANGLE_SPEED_X_PID.KP=%f\r\n",ANGLE_SPEED_X_PID.KP);
+						break;
+			
+					case '3':
+						Adjust_Gyro();   //取陀螺仪零偏
+						
+						break;
+					case '4':
+						Load_Prams();
+						break;
+					case '5':
+						Write_Prams();  //写参数 
+						break;
+					
 
-			
-			case 'A':  //手柄左边 上
-				pitch_target-=0.05;
-				uprintf(USART,"%f\r\n",pitch_target);
-				break;
-			case 'B':    //下
-				pitch_target+=0.05;
-			uprintf(USART,"%f\r\n",pitch_target);
-				break;
-			case 'C':   //左
-				roll_target+=0.05;
-				uprintf(USART,"%f\r\n",roll_target);
-				break;
-			case 'D':		//右
-				roll_target-=0.05;
-			uprintf(USART,"%f\r\n",roll_target);
-				break;		
-			
-			case 'I':
-				base_duty+=1;
-				break;
-			
-			case 'J':
-				base_duty-=1;
-				break;
-			case 'K':
-				base_duty=35;
-				break;
-			case 'L':
-				Fly=0;
-				break;
-			case 'G':   //select
-				Fly=1;
-				break;
-			case 'E':    //左边的1
-				save=1;
-				break;
-			case 'N':		//右边的2
-				if(save){
-					Write_Prams(); 
-					save=0;
-				}
-				break;
-			
-			case 'P':
-				Height_PID.KP+=0.1;
-				uprintf(USART,"height_PID.KP=%f\r\n",Height_PID.KP);
-				break;
-			case 'Q':
-				Height_PID.KP-=0.1;
-				uprintf(USART,"height_PID.KP=%f\r\n",Height_PID.KP);
-				break;
-			default:
-				break;
-		} 
+					case '7':
+						Height_Out=15;
+						//roll_target=10;
+						uprintf(USART,"height_out =15!!\r\n");
+						break;
+					case '8':
+						Height_Out=0;
+						uprintf(USART,"Height_Out =0!!\r\n");
+						break;
+					case '9':
+						Roll_Out=0;
+						uprintf(USART,"roll_out =0!!\r\n");
+						break;
+					case '0':
+						Roll_Out=5;
+						uprintf(USART,"roll_out =5!!\r\n");
+						break;
+
+					
+					case 'A':  //手柄左边 上
+						pitch_target-=0.05;
+						uprintf(USART,"%f\r\n",pitch_target);
+						break;
+					case 'B':    //下
+						pitch_target+=0.05;
+					uprintf(USART,"%f\r\n",pitch_target);
+						break;
+					case 'C':   //左
+						roll_target+=0.05;
+						uprintf(USART,"%f\r\n",roll_target);
+						break;
+					case 'D':		//右
+						roll_target-=0.05;
+					uprintf(USART,"%f\r\n",roll_target);
+						break;		
+					
+					case 'I':
+						base_duty+=1;
+						break;
+					
+					case 'J':
+						base_duty-=1;
+						break;
+					case 'K':
+						base_duty=35;
+						break;
+					case 'L':
+						Fly=0;
+						break;
+					case 'G':   //select
+						Fly=1;
+						break;
+					case 'E':    //左边的1
+						save=1;
+						break;
+					case 'N':		//右边的2
+						if(save){
+							Write_Prams(); 
+							save=0;
+						}
+						break;
+					
+					case 'P':
+						Height_PID.KP+=0.1;
+						uprintf(USART,"height_PID.KP=%f\r\n",Height_PID.KP);
+						break;
+					case 'Q':
+						Height_PID.KP-=0.1;
+						uprintf(USART,"height_PID.KP=%f\r\n",Height_PID.KP);
+						break;
+					#endif
+				default:
+					break;
+			}
+		}
+	}
+}
+
+
+//void UART4_IRQHandler(void){
+//	unsigned char c;
+//	if(USART_GetITStatus(USART, USART_IT_RXNE) != RESET) {  
+//		USART_ClearITPendingBit(USART,USART_IT_RXNE); 
+//		c=USART_ReceiveData(USART);
+//		if(c!='\n'){
+//			serial_buf[serial_cnt]=c;
+//			serial_cnt++;
+
+//		}else{
+//			serial_buf[serial_cnt]=c;
+//			serial_cnt=0;
+//			rx_ok=1;
+//			return ;
+//		}
+//		serial_cnt%=30;
+//	}
+//}
+
+void Get_Position(){
+	int i;
+	for(i=0;i<10&&serial_buf[i]!=SERIAL_END;++i);
+//		if(serial_buf[i]=='s'){
+//			Fly_Stop();
+//		}else if(serial_buf[i]==','){
+//			Fly_Land();
+//		}
+		;
+	//}
+	
+	//此时，i为长度
+	i-=1;
+	if(i%2!=0){
+		//收到的XY坐标为奇数，出了问题 
+		return ;
+	}else{
+		//i/=2;
+		//只取最前面的坐标，试试
+		Check_Position(serial_buf[1],serial_buf[2]);
+	}
+	
+	
+}
+
+void Check_Position(u8 x,u8 y){
+	if(x<160&&x>0&&y<160&&y>0){
+		position_x=x;
+		position_y=y;
+	}else{
+		return ;
 	}
 }

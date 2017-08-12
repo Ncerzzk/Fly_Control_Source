@@ -27,7 +27,46 @@ Project File Date:  08/01/2017
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 1 (build 61)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Target 1'
-".\Objects\stm32.axf" - 0 Error(s), 0 Warning(s).
+compiling main.c...
+user\main.h(5): warning:  #1-D: last line of file ends without a newline
+  extern double angle_x;
+user\timer.h(5): warning:  #1295-D: Deprecated declaration Tim2_Init - give arg types
+  void Tim2_Init();
+user\timer.h(7): warning:  #1295-D: Deprecated declaration TIM3_Cap_Init - give arg types
+  void TIM3_Cap_Init();
+user\timer.h(8): warning:  #1-D: last line of file ends without a newline
+  #endif
+user\lt8910.h(48): warning:  #1-D: last line of file ends without a newline
+  #endif
+user\ms5611.h(13): warning:  #1-D: last line of file ends without a newline
+  #endif
+user\hmc5883.h(3): warning:  #1295-D: Deprecated declaration hmc5883lInit - give arg types
+  void hmc5883lInit();
+user\spi.h(28): warning:  #47-D: incompatible redefinition of macro "CONFIG" (declared at line 11 of "user\mpu9250.h")
+  #define CONFIG          0x00  //???眉拇??鞯?址;bit0:1????模式,0发??模式;bit1:??选??;bit2:CRC模式;bit3:CRC使??;
+user\spi.h(66): warning:  #1-D: last line of file ends without a newline
+  #endif
+user\main.c(26): warning:  #1295-D: Deprecated declaration Get_Position - give arg types
+  void Get_Position();
+user\main.c(33): warning:  #951-D: return type of function "main" must be "int"
+  void main(){
+user\main.c(126): warning:  #223-D: function "send_wave" declared implicitly
+  				   send_wave((int)CH1_Out,(int)CH2_Out,(int)CH3_Out,(int)CH4_Out); 
+user\main.c(34): warning:  #177-D: variable "temp" was declared but never referenced
+  	int temp;
+user\main.c(35): warning:  #177-D: variable "i" was declared but never referenced
+  	int i=0;
+user\main.c(36): warning:  #177-D: variable "tx_buff" was declared but never referenced
+  	char tx_buff[2]={0x55,0x65};
+user\main.c(230): warning:  #223-D: function "SR04_Trig" declared implicitly
+  					SR04_Trig();
+user\main.c(236): warning:  #223-D: function "HMC_Get_Mag" declared implicitly
+  				HMC_Get_Mag();    //20ms 涓�娆?
+user\main.c: 17 warnings, 0 errors
+linking...
+Program Size: Code=32056 RO-data=1096 RW-data=884 ZI-data=4324  
+FromELF: creating hex file...
+".\Objects\stm32.axf" - 0 Error(s), 17 Warning(s).
 
 <h2>Collection of Component include folders:</h2>
   C:\Users\ncer\Desktop\绿鲤鱼\RTE

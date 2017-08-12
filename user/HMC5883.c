@@ -103,72 +103,72 @@ void hmc5883lInit()
     int bret = 1;           // Error indicator
 		
 		MPU_Single_Write(INT_PIN_CFG,0x02);    //MPU6500 开启路过模式
+    delay_us(5*1000);
 		
-    delay_us(50*1000);
-		HMC_Write(HMC58X3_R_CONFA,0x010 + HMC_POS_BIAS);
-    // Note that the  very first measurement after a gain change maintains the same gain as the previous setting.
-    // The new gain setting is effective from the second measurement and on.
-    HMC_Write(HMC58X3_R_CONFB, 0x60); // Set the Gain to 2.5Ga (7:5->011)
-    delay_us(100*1000);
-    hmc5883lRead(magADC);
+//		HMC_Write(HMC58X3_R_CONFA,0x010 + HMC_POS_BIAS);
+//    // Note that the  very first measurement after a gain change maintains the same gain as the previous setting.
+//    // The new gain setting is effective from the second measurement and on.
+//    HMC_Write(HMC58X3_R_CONFB, 0x60); // Set the Gain to 2.5Ga (7:5->011)
+//    delay_us(100*1000);
+//    hmc5883lRead(magADC);
 
-    for (i = 0; i < 10; i++) {  // Collect 10 samples
-        HMC_Write(HMC58X3_R_MODE, 1);
-        delay_us(50*1000);
-        hmc5883lRead(magADC);       // Get the raw values in case the scales have already been changed.
+//    for (i = 0; i < 10; i++) {  // Collect 10 samples
+//        HMC_Write(HMC58X3_R_MODE, 1);
+//        delay_us(50*1000);
+//        hmc5883lRead(magADC);       // Get the raw values in case the scales have already been changed.
 
-        // Since the measurements are noisy, they should be averaged rather than taking the max.
-        xyz_total[0] += magADC[0];
-        xyz_total[1] += magADC[1];
-        xyz_total[2] += magADC[2];
+//        // Since the measurements are noisy, they should be averaged rather than taking the max.
+//        xyz_total[0] += magADC[0];
+//        xyz_total[1] += magADC[1];
+//        xyz_total[2] += magADC[2];
 
-        // Detect saturation.
-				temp=min(magADC[1], magADC[2]);
-				temp=min(magADC[0], temp);
-        if (-4096 >= temp) {
-            bret = 0;
-            break;              // Breaks out of the for loop.  No sense in continuing if we saturated.
-        }
-    }
+//        // Detect saturation.
+//				temp=min(magADC[1], magADC[2]);
+//				temp=min(magADC[0], temp);
+//        if (-4096 >= temp) {
+//            bret = 0;
+//            break;              // Breaks out of the for loop.  No sense in continuing if we saturated.
+//        }
+//    }
 
-    // Apply the negative bias. (Same gain)
-    HMC_Write(HMC58X3_R_CONFA, 0x010 + HMC_NEG_BIAS);   // Reg A DOR = 0x010 + MS1, MS0 set to negative bias.
-    for (i = 0; i < 10; i++) {
-        HMC_Write(HMC58X3_R_MODE, 1);
-        delay_us(50*1000);
-        hmc5883lRead(magADC);               // Get the raw values in case the scales have already been changed.
+//    // Apply the negative bias. (Same gain)
+//    HMC_Write(HMC58X3_R_CONFA, 0x010 + HMC_NEG_BIAS);   // Reg A DOR = 0x010 + MS1, MS0 set to negative bias.
+//    for (i = 0; i < 10; i++) {
+//        HMC_Write(HMC58X3_R_MODE, 1);
+//        delay_us(50*1000);
+//        hmc5883lRead(magADC);               // Get the raw values in case the scales have already been changed.
 
-        // Since the measurements are noisy, they should be averaged.
-        xyz_total[0] -= magADC[0];
-        xyz_total[1] -= magADC[1];
-        xyz_total[2] -= magADC[2];
+//        // Since the measurements are noisy, they should be averaged.
+//        xyz_total[0] -= magADC[0];
+//        xyz_total[1] -= magADC[1];
+//        xyz_total[2] -= magADC[2];
 
-        // Detect saturation.
-				temp=min(magADC[1], magADC[2]);
-				temp=min(magADC[0],temp);
-        if (-4096 >= temp) {
-            bret =0;
-            break;              // Breaks out of the for loop.  No sense in continuing if we saturated.
-        }
-    }
+//        // Detect saturation.
+//				temp=min(magADC[1], magADC[2]);
+//				temp=min(magADC[0],temp);
+//        if (-4096 >= temp) {
+//            bret =0;
+//            break;              // Breaks out of the for loop.  No sense in continuing if we saturated.
+//        }
+//    }
 
-    magGain[0] = fabs(660.0f * HMC58X3_X_SELF_TEST_GAUSS * 2.0f * 10.0f / xyz_total[0]);
-    magGain[1] = fabs(660.0f * HMC58X3_Y_SELF_TEST_GAUSS * 2.0f * 10.0f / xyz_total[1]);
-    magGain[2] = fabs(660.0f * HMC58X3_Z_SELF_TEST_GAUSS * 2.0f * 10.0f / xyz_total[2]);
+//    magGain[0] = fabs(660.0f * HMC58X3_X_SELF_TEST_GAUSS * 2.0f * 10.0f / xyz_total[0]);
+//    magGain[1] = fabs(660.0f * HMC58X3_Y_SELF_TEST_GAUSS * 2.0f * 10.0f / xyz_total[1]);
+//    magGain[2] = fabs(660.0f * HMC58X3_Z_SELF_TEST_GAUSS * 2.0f * 10.0f / xyz_total[2]);
 
     // leave test mode
     HMC_Write(HMC58X3_R_CONFA, 0x78);   // Configuration Register A  -- 0 11 110 00  num samples: 8 ; output rate: 75Hz ; normal measurement mode
     HMC_Write(HMC58X3_R_CONFB, 0x20);   // Configuration Register B  -- 001 00000    configuration gain 1.3Ga
     HMC_Write(HMC58X3_R_MODE, 0x00);    // Mode register             -- 000000 00    continuous Conversion Mode
     delay_us(100*1000);
-    magGain[0] = 0.95f;
-    magGain[1] = 1.05f;
-    magGain[2] = 1.005f;
-    if (!bret) {                // Something went wrong so get a best guess
-        magGain[0] = 1.0f;
-        magGain[1] = 1.0f;
-        magGain[2] = 1.0f;
-    }
+//    magGain[0] = 0.95f;
+//    magGain[1] = 1.05f;
+//    magGain[2] = 1.005f;
+//    if (!bret) {                // Something went wrong so get a best guess
+//        magGain[0] = 1.0f;
+//        magGain[1] = 1.0f;
+//        magGain[2] = 1.0f;
+//    }
 }
 
 void hmc5883lRead(int16_t *magData)
@@ -194,13 +194,13 @@ void HMC_Get_Mag(void){
 	MAG_Cnt++;
 	if(MAG_Cnt>=8){
 		MPU_Single_Write(INT_PIN_CFG,0x02);    //MPU6500 开启路过模式
-		hmc5883lRead(temp);
+		hmc5883lRead(temp);  
 		Mag_X=(float)temp[0]/1090.0;
 		Mag_Y=(float)temp[1]/1090.0;
 		Mag_Z=(float)temp[2]/1090.0;
 
 		MAG_Cnt=0;
-		Adjust_HMC();
+	  Adjust_HMC();
 		//uprintf(USART,"%f,%f,%f\r\n",Mag_X,Mag_Y,Mag_Z);
 	}
 }
@@ -216,16 +216,46 @@ Axis3f MagOffset;   // 磁力计偏移量参数
 float B[6];                   // 磁力计校准B参数
 
 void Adjust_HMC(void){
-	B[0]=0.93613258676408;
-	B[1]=0.00267184778915339;
-	B[2]=0.0259231678709882;
-	B[3]=0.953676023637478;
-	B[4]=0.0035936506696941;
-	B[5]=1.12085263700066;
-	MagOffset.x=-0.0114886290660598;
-	MagOffset.y=-0.11362460257489;
-	MagOffset.z=0.0678062294292163;
+//	B[0]=0.93613258676408;
+//	B[1]=0.00267184778915339;
+//	B[2]=0.0259231678709882;
+//	B[3]=0.953676023637478;
+//	B[4]=0.0035936506696941;
+//	B[5]=1.12085263700066;
+//	MagOffset.x=-0.0114886290660598;
+//	MagOffset.y=-0.11362460257489;
+//	MagOffset.z=0.0678062294292163;
 	
+//	B[0]=0.942059657596961;
+//	B[1]=0.0107909983728525;
+//	B[2]=0.0141109005715537;
+//	B[3]=0.957308964717189;
+//	B[4]=0.00111754872956828;
+//	B[5]=1.10919700109128;
+//	MagOffset.x=0.176609615453725;
+//	MagOffset.y=0.4746703072921179;
+//	MagOffset.z=0.316836396117909;
+	
+	B[0]=0.936859492684383;
+	B[1]=0.0109815323481935;
+	B[2]=0.0131128993824421;
+	B[3]=0.956026629096859;
+	B[4]=0.00860745619017331;
+	B[5]=1.11690047630345;
+	MagOffset.x=-0.0134901843442215;
+	MagOffset.y=-0.118574474429709;
+	MagOffset.z=0.074137532050702;
+	
+//	B[0]=0.937111415992436;
+//	B[1]=0.011222928202513;
+//	B[2]=0.0181466445108325;
+//	B[3]=0.954835985200554;
+//	B[4]=0.00270265325171252;
+//	B[5]=1.11809873901941;
+//	MagOffset.x=-0.0221331702734922;
+//	MagOffset.y=-0.08553354196849961;
+//	MagOffset.z=0.0678552344079811;
+//	
 	tmp3f.x = Mag_X - MagOffset.x;
 	tmp3f.y = Mag_Y - MagOffset.y;
 	tmp3f.z = Mag_Z - MagOffset.z;

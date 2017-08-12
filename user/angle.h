@@ -35,6 +35,7 @@ void Get_Angle_Speed(void);
 void Get_Mag_Angle(void);
 void IMU_Update(float ax,float ay,float az,float wx,float wy,float wz);
 void AHR_Update(float ax,float ay,float az,float wx,float wy,float wz,float mx,float my,float mz);  
+void IMU_Update2(float ax,float ay,float az,float wx,float wy,float wz);
 void Get_Angle(void);
 void Adjust_Gyro(void);
 void Adjust_Acc(void);

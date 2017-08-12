@@ -35,7 +35,14 @@ float q1=0;
 float q2=0;
 float q3=0;
 
+float q0_=1;
+float q1_=0;
+float q2_=0;
+float q3_=0;
+
 float exInt,eyInt,ezInt;
+
+float exInt_,eyInt_,ezInt_;
 
 float IMU_P=2;
 float IMU_I=0.005;
@@ -317,9 +324,81 @@ void AHR_Update(float ax,float ay,float az,float wx,float wy,float wz,float mx,f
 		q2/=norm;
 		q3/=norm;
 		
-		pitch= asin(-2*q1*q3 + 2*q0*q2)* 57.3;
-		roll= atan2(2*q2*q3 + 2*q0*q1, -2*q1*q1 - 2*q2*q2+1)* 57.3; 
+		//pitch= asin(-2*q1*q3 + 2*q0*q2)* 57.3;
+		//roll= atan2(2*q2*q3 + 2*q0*q1, -2*q1*q1 - 2*q2*q2+1)* 57.3; 
 		yaw=atan2(2*q1q2 + 2*q0q3, -2*q2q2 - 2*q3q3+1)* 57.3; 
+		
+//		if(GY521){
+//			if(roll>0){
+//				roll-=180;
+//			}else{
+//				roll+=180;
+//			}
+//		}
+}
+
+void IMU_Update2(float ax,float ay,float az,float wx,float wy,float wz){
+	float norm;
+	float gbx,gby,gbz;
+  float q0q0 = q0_ * q0_;                                                        
+  float q0q1 = q0_ * q1_;
+  float q0q2 = q0_ * q2_;
+  float q1q1 = q1_ * q1_;
+  float q1q3 = q1_ * q3_;
+  float q2q2 = q2_ * q2_;
+  float q2q3 = q2_ * q3_;
+  float q3q3 = q3_ * q3_;
+	float q1q2=q1_*q2_;
+	float q0q3=q0_*q3_;
+	float ex,ey,ez;
+//	float exInt,eyInt,ezInt;     在这里定义有问题
+	norm=sqrt(ax*ax+ay*ay+az*az);
+	if(norm<Semig)
+		return ;
+	ax/=norm;
+	ay/=norm;
+	az/=norm; 
+	
+	//计算重力加速度旋转到机体坐标系后的值,即以当前估计的姿态作为旋转矩阵
+	gbx= 2*(q1q3 - q0q2);
+	gby= 2*(q0q1 + q2q3);
+	gbz= q0q0 - q1q1 - q2q2 + q3q3;
+	
+	//与实际加速度计测得的ax,ay,az做叉积，取误差
+	
+	
+    ex = (ay*gbz - az*gby);                                                                
+    ey = (az*gbx - ax*gbz);
+    ez = (ax*gby - ay*gbx);	
+	
+	
+		exInt_ += ex*IMU_I*INTEGRAL_CONSTANT;
+		eyInt_ += ey*IMU_I*INTEGRAL_CONSTANT;
+		ezInt_ += ez*IMU_I*INTEGRAL_CONSTANT;
+		
+		//补偿误差
+		wx+=ex*IMU_P+exInt_;
+		wy+=ey*IMU_P+eyInt_;
+		wz+=ez*IMU_P+ezInt_;
+	
+		//更新四元数
+		q0_=  q0_ + (-q1_*wx - q2_*wy - q3_*wz)*HALF_T;
+		q1_ = q1_ + (q0_*wx + q2_*wz - q3_*wy)*HALF_T;
+		q2_ = q2_ + (q0_*wy - q1_*wz + q3_*wx)*HALF_T;
+		q3_ = q3_ + (q0_*wz + q1_*wy - q2_*wx)*HALF_T; 
+	
+		//计算欧拉角
+		norm=sqrt(q0_*q0_+q1_*q1_+q2_*q2_+q3_*q3_);
+		if(norm<Semig)
+			return ;
+		q0_/=norm;
+		q1_/=norm;
+		q2_/=norm;
+		q3_/=norm;
+		
+		pitch= asin(-2*q1_*q3_ + 2*q0_*q2_)* 57.3;
+		roll= atan2(2*q2_*q3_ + 2*q0_*q1_, -2*q1_*q1_ - 2*q2_*q2_+1)* 57.3; 
+		
 		
 		if(GY521){
 			if(roll>0){

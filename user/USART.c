@@ -14,9 +14,10 @@ void Usart_Init(USART_TypeDef * USARTx,int BaudRate){
   USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
 	
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
 	//NVIC_InitStructure.NVIC_IRQChannel = USARTy_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   //NVIC_Init(&NVIC_InitStructure);
 	
@@ -61,6 +62,7 @@ void Usart_Init(USART_TypeDef * USARTx,int BaudRate){
 	
 	USART_Cmd(USARTx,ENABLE);
 	USART_ITConfig(USARTx, USART_IT_RXNE, ENABLE); 
+//	USART_ITConfig(USARTx, USART_IT_ERR, ENABLE); 
 }
 
 

@@ -16,7 +16,7 @@
 	#define CH3_START 270
 	#define CH4_START 300
 	
-	#define CH_END 520         //CH3 540  CH2 540
+	#define CH_END 500        //CH3 540  CH2 540
 #endif
 
 
@@ -24,7 +24,7 @@
 float Limit_Duty(float duty);
 
 #define Limit(value,max)     if(value>max)value=max;else if(value<-max)value=-max
-
+extern float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 
 #define Set_Brush_Speed(CH,duty) TIM_SetCompare##CH(TIM2,Limit_Duty(duty)*4095/100)
 void Set_Brushless_Speed(int ch,int duty);
@@ -84,6 +84,8 @@ extern float CH1_Out,CH2_Out,CH3_Out,CH4_Out;
 extern float Height_Out;
 extern float Pitch_Out;
 extern float Roll_Out;
+extern float yaw_offset;
+
 #define clear_i(PID) PID.i=0//;PID.i_max=DUTY_MAX/10/(abs(PID.KI)==0.0?0.001:abs(PID.KI))
 
 #define Pram_Size 5
@@ -114,4 +116,11 @@ extern float height_target,height_offset;
 extern float Accel_Speed_Z_Out;
 extern Kal_Struct kal_acc_z;
 extern PID_S Velocity_PID;
+extern float yaw_dealed;
+
+extern int position_x,position_y;
+
+#define PITCH_CONSTANT -3 //-4.1
+#define ROLL_CONSTANT   -3    //3.8
+
 #endif
